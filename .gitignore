@@ -40,6 +40,13 @@ sysinfo.txt
 # 배치모드 빌드 로그. 매 실행마다 갱신되는 산출물이다.
 /*.log
 
+# TextMesh Pro 기본 리소스 (4MB).
+# com.unity.ugui에 포함돼 있어 Unity가 필요할 때 Assets/로 다시 풀어놓는다.
+# 우리 코드/씬 어디에서도 참조하지 않으므로 저장소에 둘 이유가 없다.
+# 나중에 TMP로 UI를 만들면 그때 이 줄을 지우고 커밋한다.
+/Assets/TextMesh Pro/
+/Assets/TextMesh Pro.meta
+
 # ── OS / 에디터 ──
 .DS_Store
 Thumbs.db

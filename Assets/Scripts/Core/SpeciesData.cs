@@ -67,8 +67,8 @@ namespace Deskmon.Core
         [Tooltip("친밀도 외 추가 진화 조건.")]
         public EvolveCondition evolveCondition = EvolveCondition.None;
 
-        [Tooltip("포획 미니게임. ByRarity면 희귀도 기본 매핑을 따른다.")]
-        public CaptureStyle captureStyle = CaptureStyle.ByRarity;
+        [Tooltip("행동 패턴 = 접근 난이도. 포획 자체는 각인 그리기로 통일됐다 (상세기획 §12).")]
+        public BehaviorPattern pattern = BehaviorPattern.Calm;
 
         // ── 파생 값 ──
 
@@ -108,18 +108,6 @@ namespace Deskmon.Core
             if (balance == null) return 0f;
             int idx = Mathf.Clamp(stage + 3 - forms, 0, balance.prodBase.Length - 1);
             return balance.prodBase[idx] * balance.ProdMultiplier(rarity);
-        }
-
-        /// <summary>실제 적용될 포획 방식. ByRarity면 희귀도 기본 매핑으로 해석한다 (기획서 v4 §5).</summary>
-        public CaptureStyle ResolvedCaptureStyle()
-        {
-            if (captureStyle != CaptureStyle.ByRarity) return captureStyle;
-            switch (rarity)
-            {
-                case Rarity.Legendary: return CaptureStyle.Lasso;
-                case Rarity.Epic:      return CaptureStyle.Timing;
-                default:               return CaptureStyle.Grab;   // common · rare
-            }
         }
 
         void OnValidate()

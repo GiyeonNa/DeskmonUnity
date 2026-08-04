@@ -41,13 +41,22 @@ namespace Deskmon.Core
         Fed,
     }
 
-    /// <summary>포획 미니게임 (기획서 v4 §5). 기본값은 희귀도 매핑을 따르되 종별 예외 지정 가능.</summary>
-    public enum CaptureStyle
+    /// <summary>
+    /// 행동 패턴 = 접근 난이도. data.js SPECIES의 pattern.
+    ///
+    /// 상세기획 §12에서 포획은 각인 그리기 하나로 통합됐지만, "다가가는 미니게임"인
+    /// 이 패턴들은 그대로 남았다. 각인을 시작하려면 먼저 야생 근처를 눌러야 하는데
+    /// 겁쟁이는 도망가고 순간이동형은 사라지므로, 여기서 손맛이 갈린다 (§3.3).
+    /// </summary>
+    public enum BehaviorPattern
     {
-        /// <summary>희귀도 기본값 사용 — 일반·희귀=그랩, 에픽=타이밍, 전설=올가미.</summary>
-        ByRarity,
-        Grab,
-        Timing,
-        Lasso,
+        /// <summary>느긋함 - 사인곡선 산책. 사실상 확정 포획.</summary>
+        Calm,
+        /// <summary>겁쟁이 - 커서 150px 접근 시 도주, 4초 도망가면 2.5초 헐떡(무방비).</summary>
+        Shy,
+        /// <summary>순간이동 - 주기적으로 페이드아웃 후 랜덤 위치 재등장.</summary>
+        Blink,
+        /// <summary>표류 - 전설(루미·크로노)의 느린 부유.</summary>
+        Drift,
     }
 }

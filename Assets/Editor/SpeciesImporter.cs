@@ -38,64 +38,77 @@ namespace Deskmon.EditorTools
             public SpawnGate gate;
             public Faction faction;
             public EvolveCondition evolve;
+            public BehaviorPattern pattern;
         }
 
         static readonly Row[] Rows =
         {
             new Row { id="mongle", name="몽글이", field=Field.Grass, rarity=Rarity.Common, forms=3,
                       color="#8fd977", shiny="#f5a3d0", evo=new[]{"몽글이","잎몽이","꽃몽이"},
+                      pattern=BehaviorPattern.Calm,
                       desc="햇살을 좋아하는 새싹 젤리. 기분이 좋으면 머리 위 잎이 살랑거린다." },
 
             new Row { id="kkang", name="깡총이", field=Field.Grass, rarity=Rarity.Common, forms=2,
                       color="#ffd35c", shiny="#7de8c3", evo=new[]{"깡총이","왕깡총"}, hop=true,
+                      pattern=BehaviorPattern.Calm,
                       desc="가만히 있질 못하는 점프꾼. 귀가 안테나처럼 쫑긋거린다." },
 
             new Row { id="bandi", name="반디", field=Field.Grass, rarity=Rarity.Rare, forms=1,
                       color="#7dd6ff", shiny="#ffb0e0", evo=new[]{"반디"}, night=true,
+                      pattern=BehaviorPattern.Shy,
                       desc="밤에만 반짝이는 수줍은 빛의 정령. 진화하지 않는 대신 태생이 특별하다." },
 
             new Row { id="dotori", name="도토리", field=Field.Forest, rarity=Rarity.Common, forms=3,
                       color="#b98d5e", shiny="#cfd6e0", evo=new[]{"도토리","도톨이","참나무지기"},
+                      pattern=BehaviorPattern.Calm,
                       desc="도토리 모자를 아끼는 숲의 살림꾼. 겨울을 대비해 뭔가를 자꾸 모은다." },
 
             new Row { id="mush", name="버섯쫑", field=Field.Forest, rarity=Rarity.Rare, forms=2,
                       color="#ff8d7b", shiny="#7da9ff", evo=new[]{"버섯쫑","광대쫑"},
                       evolve=EvolveCondition.Fed,
+                      pattern=BehaviorPattern.Shy,
                       desc="축축한 그늘에서 자라는 장난꾸러기. 갓을 흔들면 포자가 날린다." },
 
             new Row { id="owl", name="부엉", field=Field.Forest, rarity=Rarity.Epic, forms=2,
                       color="#a98bff", shiny="#ff9d6b", evo=new[]{"부엉","현자부엉"},
                       night=true, evolve=EvolveCondition.Night,
+                      pattern=BehaviorPattern.Blink,
                       desc="숲의 밤을 지키는 관찰자. 밤이 깊어야만 다음 모습을 보여준다." },
 
             new Row { id="lumi", name="루미", field=Field.Special, rarity=Rarity.Legendary, forms=1,
                       color="#ffffff", shiny="#3d3b52", evo=new[]{"루미"}, rainbow=true,
+                      pattern=BehaviorPattern.Drift,
                       desc="아주 드물게 나타나는 빛의 젤리. 붙잡을 수 없고, 오직 원을 그려 맞이해야 한다." },
 
             // ── M4 신규 ──
             new Row { id="dewdrop", name="이슬방울", field=Field.Lake, rarity=Rarity.Common, forms=2,
                       color="#8fd6e8", shiny="#ffd6a0", evo=new[]{"이슬방울","이슬왕관"},
                       faction=Faction.Dew,
+                      pattern=BehaviorPattern.Shy,
                       desc="풀잎 끝에 맺히는 맑은 물방울. 이슬 팀의 상징이다." },
 
             new Row { id="mossy", name="이끼돌", field=Field.Lake, rarity=Rarity.Common, forms=2,
                       color="#9cc26b", shiny="#c89cff", evo=new[]{"이끼돌","이끼거인"},
                       faction=Faction.Moss,
+                      pattern=BehaviorPattern.Calm,
                       desc="오래된 바위에 이끼가 자라 깨어난 정령. 이끼 팀의 상징이다." },
 
             new Row { id="origami", name="종이접기", field=Field.Office, rarity=Rarity.Rare, forms=1,
                       color="#f0f0f0", shiny="#ffe08a", evo=new[]{"종이접기"},
                       gate=SpawnGate.WeekdayWork,
+                      pattern=BehaviorPattern.Calm,
                       desc="평일 낮, 일하는 책상에서만 접혀 나타나는 종이 생물." },
 
             new Row { id="dozy", name="꾸벅이", field=Field.Office, rarity=Rarity.Rare, forms=3,
                       color="#b3a6e0", shiny="#a0e0c0", evo=new[]{"꾸벅이","꿈꾸미","몽환몽"},
                       gate=SpawnGate.LateNight,
+                      pattern=BehaviorPattern.Calm,
                       desc="깊은 밤에만 스르륵 나타나는 잠의 몬스터." },
 
             new Row { id="chrono", name="크로노", field=Field.Event, rarity=Rarity.Legendary, forms=1,
                       color="#ffffff", shiny="#3d3b52", evo=new[]{"크로노"},
                       rainbow=true, eventOnly=true,
+                      pattern=BehaviorPattern.Drift,
                       desc="매주 금요일 밤, 모두의 화면에 동시에 나타나는 시간의 전설." },
         };
 
@@ -164,7 +177,7 @@ namespace Deskmon.EditorTools
                 sp.faction = r.faction;
                 sp.eventOnly = r.eventOnly;
                 sp.evolveCondition = r.evolve;
-                sp.captureStyle = CaptureStyle.ByRarity;
+                sp.pattern = r.pattern;
 
                 // 폼별 도트가 나오기 전까지는 플레이스홀더 1장을 전 폼이 공유한다.
                 var placeholder = AssetDatabase.LoadAssetAtPath<Sprite>($"{SPRITE_DIR}/{r.id}.png");

@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using Deskmon.Native;
 
@@ -26,6 +27,29 @@ namespace Deskmon.Capture
         SigilCapture _capture;
         Camera _cam;
         bool _appliedCaptureAll;
+
+        /// <summary>
+        /// 입력을 삼킬 화면 영역 (스크린 좌표, 좌하단 원점).
+        ///
+        /// 각인 중에는 화면 어디를 눌러도 획이 시작되는데, 그러면 그 위에 얹힌 버튼을
+        /// 누를 때도 획이 그어진다. 테스트 하네스처럼 UI를 겹쳐 두는 쪽이 여기에
+        /// 자기 영역을 등록해 두면 그 안의 클릭은 무시한다.
+        /// </summary>
+        static readonly List<Rect> BlockedRects = new List<Rect>();
+
+        public static void BlockArea(Rect screenRect)
+        {
+            if (!BlockedRects.Contains(screenRect)) BlockedRects.Add(screenRect);
+        }
+
+        public static void UnblockArea(Rect screenRect) => BlockedRects.Remove(screenRect);
+
+        static bool IsBlocked(Vector2 screenPos)
+        {
+            for (int i = 0; i < BlockedRects.Count; i++)
+                if (BlockedRects[i].Contains(screenPos)) return true;
+            return false;
+        }
 
         void Awake()
         {
@@ -73,6 +97,9 @@ namespace Deskmon.Capture
 
         void OnPress(Vector2 cursor)
         {
+            // UI가 덮고 있는 자리면 획을 시작하지 않는다 (버튼 클릭이 선으로 남는 것 방지)
+            if (IsBlocked(cursor)) return;
+
             // 이미 각인 중이면 화면 어디서 눌러도 획이 시작된다. overlay.html:291-293
             if (_capture.Engaged)
             {

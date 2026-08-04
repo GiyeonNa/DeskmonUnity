@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a21e1dcee10800e4098b428fb5a8b297, type: 3}
+  m_Name: Field_Forest
+  m_EditorClassIdentifier: 
+  id: 1
+  displayName: "\uC232"
+  unlockCost: 200
+  dayTop: {r: 0.8235294, g: 0.92156863, b: 0.7764706, a: 1}
+  dayBottom: {r: 0.56078434, g: 0.7529412, b: 0.4862745, a: 1}
+  nightTop: {r: 0.13333334, g: 0.20392157, b: 0.2784314, a: 1}
+  nightBottom: {r: 0.0627451, g: 0.12156863, b: 0.17254902, a: 1}

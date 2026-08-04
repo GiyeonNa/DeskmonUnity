@@ -177,6 +177,55 @@ namespace Deskmon.Capture
             if (OkFlash > 0f) OkFlash -= dt;
         }
 
+        /// <summary>
+        /// 문양 목록을 직접 지정한다. **디버그 전용.**
+        /// 무작위 추첨으로는 8종을 다 만나는 것이 보장되지 않아, 전수 확인용으로 둔다.
+        /// </summary>
+        public void DebugSetGlyphs(IList<string> glyphs)
+        {
+            if (glyphs == null || glyphs.Count == 0) return;
+
+            _glyphs.Clear();
+            for (int i = 0; i < glyphs.Count; i++) _glyphs.Add(glyphs[i]);
+
+            _index = 0;
+            RefreshCurrent();
+            _stroke.Clear();
+            _drawing = false;
+            ShakeT = 0f;
+            OkFlash = 0f;
+        }
+
+        /// <summary>
+        /// 판정을 건너뛰고 문양 인덱스를 직접 옮긴다. **디버그 전용.**
+        ///
+        /// 각인 UI를 확인하려면 문양 8종이 실제로 어떻게 그려지는지 다 봐야 하는데,
+        /// 정상 흐름에서는 앞 문양을 맞춰야만 다음으로 넘어가서 어려운 문양(나선·번개)에
+        /// 막히면 뒤를 볼 수가 없다. 그래서 순회 수단을 따로 둔다.
+        ///
+        /// 포획으로 이어지지 않는다 - 마지막을 넘어가면 처음으로 돌아간다. 이 메서드로는
+        /// OnCaptured가 발화하지 않으므로 도감/세이브에 영향을 주지 않는다.
+        /// </summary>
+        public void DebugStepGlyph(int delta)
+        {
+            if (_glyphs.Count == 0) return;
+
+            _index += delta;
+
+            // 순환시킨다 - 끝에서 막히면 순회가 아니라 또 다른 벽이 된다.
+            if (_index < 0) _index = _glyphs.Count - 1;
+            else if (_index >= _glyphs.Count) _index = 0;
+
+            RefreshCurrent();
+
+            // 넘어가는 순간의 잔상을 지운다. 실패 직후 넘겼는데 빨갛게 남아 있으면
+            // 새 문양이 실패한 것처럼 보인다.
+            _stroke.Clear();
+            _drawing = false;
+            ShakeT = 0f;
+            OkFlash = 0f;
+        }
+
         /// <summary>야생이 떠났을 때 - 상태를 비운다.</summary>
         public void Cancel()
         {

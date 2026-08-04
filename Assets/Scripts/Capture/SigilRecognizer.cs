@@ -26,7 +26,19 @@ namespace Deskmon.Capture
         const float SIZE = 250f;       // 정규화 후 바운딩 박스 변 길이
         static readonly float HALF = 0.5f * Mathf.Sqrt(SIZE * SIZE * 2f);   // 최대 거리 (점수 정규화용)
 
+        /// <summary>
+        /// 정규화된 템플릿. 키는 변형 이름("spiral@2.5" 등)이고, 값은 그것이 속한 문양이다.
+        ///
+        /// 한 문양에 변형을 여러 개 두는 것은 $1 원논문이 권장하는 방식이다.
+        /// 나선처럼 "몇 바퀴를 그리느냐"가 사람마다 다른 문양은 단일 템플릿으로는
+        /// 잡을 수 없다 - 2바퀴 기준일 때 2.5바퀴를 그리면 점수가 0.2까지 떨어진다.
+        /// </summary>
         static readonly Dictionary<string, Vector2[]> Templates = new Dictionary<string, Vector2[]>();
+
+        /// <summary>변형 이름 -> 문양 이름. "spiral@2.5" -> "spiral"</summary>
+        static readonly Dictionary<string, string> VariantOwner = new Dictionary<string, string>();
+
+        /// <summary>문양 이름 -> 표시용 원본 좌표 (대표 변형 하나).</summary>
         static readonly Dictionary<string, Vector2[]> RawTemplates = new Dictionary<string, Vector2[]>();
 
         static readonly Dictionary<string, string> Labels = new Dictionary<string, string>
@@ -46,23 +58,36 @@ namespace Deskmon.Capture
         public static Vector2[] Raw(string name)
             => RawTemplates.TryGetValue(name, out var p) ? p : null;
 
-        public static IEnumerable<string> Names => Templates.Keys;
+        /// <summary>문양 이름 목록 (변형 제외).</summary>
+        public static IEnumerable<string> Names => RawTemplates.Keys;
 
         /// <summary>
         /// 지정한 문양과의 일치도 (0~1). recognizer.js match().
+        /// 변형이 여러 개면 그중 가장 잘 맞는 것을 쓴다.
         /// 점이 8개 미만이면 0 - 점 몇 개로는 형태를 판단할 수 없다.
         /// </summary>
         public static float Match(IList<Vector2> points, string name)
         {
             if (points == null || points.Count < 8) return 0f;
-            if (!Templates.TryGetValue(name, out var target)) return 0f;
+            if (!RawTemplates.ContainsKey(name)) return 0f;
 
             var cands = Candidates(points);
-            return 1f - DistanceTo(cands, target) / HALF;
+            float best = float.MaxValue;
+
+            foreach (var kv in Templates)
+            {
+                if (VariantOwner[kv.Key] != name) continue;
+                float d = DistanceTo(cands, kv.Value);
+                if (d < best) best = d;
+            }
+
+            if (best >= float.MaxValue) return 0f;
+            return 1f - best / HALF;
         }
 
         /// <summary>
         /// 전체 문양 중 가장 가까운 것을 분류한다. recognizer.js recognize().
+        /// 변형끼리 경쟁시킨 뒤 소속 문양 이름을 돌려준다.
         /// </summary>
         public static (string name, float score) Recognize(IList<Vector2> points)
         {
@@ -70,14 +95,16 @@ namespace Deskmon.Capture
 
             var cands = Candidates(points);
             float best = float.MaxValue;
-            string name = null;
+            string variant = null;
 
             foreach (var kv in Templates)
             {
                 float d = DistanceTo(cands, kv.Value);
-                if (d < best) { best = d; name = kv.Key; }
+                if (d < best) { best = d; variant = kv.Key; }
             }
-            return (name, 1f - best / HALF);
+
+            if (variant == null) return (null, 0f);
+            return (VariantOwner[variant], 1f - best / HALF);
         }
 
         /// <summary>
@@ -258,10 +285,21 @@ namespace Deskmon.Capture
 
         // ── 문양 정의 (recognizer.js 하단과 같은 좌표) ──
 
+        /// <summary>문양 등록. 표시용 원본과 기본 변형을 함께 넣는다.</summary>
         static void Add(string name, Vector2[] pts)
         {
             RawTemplates[name] = pts;
-            Templates[name] = Normalize(pts);
+            AddVariant(name, name, pts);
+        }
+
+        /// <summary>
+        /// 같은 문양의 다른 그리기 방식을 추가 등록한다.
+        /// 표시용 원본(<see cref="Raw"/>)은 바뀌지 않는다 - 화면에는 대표 모양만 보여준다.
+        /// </summary>
+        static void AddVariant(string owner, string variantKey, Vector2[] pts)
+        {
+            Templates[variantKey] = Normalize(pts);
+            VariantOwner[variantKey] = owner;
         }
 
         static void BuildTemplates()
@@ -308,6 +346,68 @@ namespace Deskmon.Capture
             Add("wave", wave);
             Add("caret", new[] { new Vector2(-1f, 0.8f), new Vector2(0f, -1f), new Vector2(1f, 0.8f) });
             Add("zigzag", new[] { new Vector2(-1f, -1f), new Vector2(1f, -0.5f), new Vector2(-1f, 0.4f), new Vector2(1f, 1f) });
+
+            AddDrawingVariants();
+        }
+
+        /// <summary>
+        /// 사람이 실제로 그리는 방식의 변형들.
+        ///
+        /// 왜 필요한가: 단일 템플릿은 "정확히 이 형태"만 인정한다. 그런데 화면의 고스트를
+        /// 보고 따라 그릴 때 사람은 바퀴 수를 세지 않고, 꺾임 수도 정확히 맞추지 않는다.
+        /// 나선을 2바퀴 기준으로만 두면 2.5바퀴를 그린 사람은 0.2점을 받는다 - 분명히
+        /// 나선을 그렸는데도 실패한다. 변형을 함께 등록해 그 폭을 인정한다.
+        ///
+        /// 반대 방향(예: 나선을 다른 문양으로 오분류)은 아래 검증에서 확인했다.
+        /// </summary>
+        static void AddDrawingVariants()
+        {
+            // ── 나선: 바퀴 수 ──
+            // 가장 취약했다. 사람은 바퀴를 세면서 그리지 않는다.
+            foreach (float turns in new[] { 1.25f, 1.5f, 2.5f, 3f })
+                AddVariant("spiral", $"spiral@{turns}", MakeSpiral(turns));
+
+            // ── 물결: 진동 횟수 ──
+            // 기본은 한 주기(위아래 한 번)다. 두 번 꺾어 그리는 사람이 많다.
+            AddVariant("wave", "wave@1.5", MakeWave(1.5f));
+            AddVariant("wave", "wave@2", MakeWave(2f));
+
+            // ── 번개: 꺾임 수 ──
+            // 기본은 3번 꺾인다. 2번이나 4번으로 그려도 번개로 인정한다.
+            AddVariant("zigzag", "zigzag@2", new[]
+            {
+                new Vector2(-1f, -1f), new Vector2(1f, -0.2f), new Vector2(-1f, 1f),
+            });
+            AddVariant("zigzag", "zigzag@4", new[]
+            {
+                new Vector2(-1f, -1f), new Vector2(1f, -0.6f), new Vector2(-1f, -0.1f),
+                new Vector2(1f, 0.5f), new Vector2(-1f, 1f),
+            });
+        }
+
+        /// <summary>나선 - turns 바퀴.</summary>
+        static Vector2[] MakeSpiral(float turns)
+        {
+            var a = new Vector2[45];
+            for (int i = 0; i <= 44; i++)
+            {
+                float t = i / 44f * Mathf.PI * 2f * turns;
+                float r = 0.12f + 0.88f * i / 44f;
+                a[i] = new Vector2(Mathf.Cos(t) * r, Mathf.Sin(t) * r);
+            }
+            return a;
+        }
+
+        /// <summary>물결 - cycles 주기만큼 좌우 진동하며 세로로 내려간다.</summary>
+        static Vector2[] MakeWave(float cycles)
+        {
+            var a = new Vector2[21];
+            for (int i = 0; i <= 20; i++)
+            {
+                float y = -1f + 2f * i / 20f;
+                a[i] = new Vector2(Mathf.Sin(i / 20f * Mathf.PI * 2f * cycles) * 0.9f, y);
+            }
+            return a;
         }
 
         /// <summary>정n각형. 마지막 점이 첫 점과 같아 닫힌 경로가 된다.</summary>

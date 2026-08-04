@@ -1,0 +1,58 @@
+# ── Unity 생성물 ──
+# 에디터가 Assets/Packages로부터 다시 만들어내는 것들. 커밋하면 안 된다.
+/[Ll]ibrary/
+/[Tt]emp/
+/[Oo]bj/
+/[Bb]uild/
+/[Bb]uilds/
+/[Ll]ogs/
+/[Uu]ser[Ss]ettings/
+/[Mm]emoryCaptures/
+/[Rr]ecordings/
+
+# Unity가 자동 생성하는 솔루션/프로젝트 파일
+*.csproj
+*.unityproj
+*.sln
+*.suo
+*.tmp
+*.user
+*.userprefs
+*.pidb
+*.booproj
+*.svd
+*.pdb
+*.mdb
+*.opendb
+*.VC.db
+
+# 빌드 산출물
+*.apk
+*.aab
+*.unitypackage
+*.app
+ExportedObj/
+.consulo/
+crashlytics-build.properties
+sysinfo.txt
+
+# ── 이 프로젝트 ──
+# 배치모드 빌드 로그. 매 실행마다 갱신되는 산출물이다.
+/*.log
+
+# ── OS / 에디터 ──
+.DS_Store
+Thumbs.db
+desktop.ini
+.vs/
+.vscode/
+.idea/
+
+# ── Unity .meta 규칙 ──
+# 무시된 폴더 안의 .meta는 같이 무시하되, 추적 중인 에셋의 .meta는 반드시 커밋한다.
+# .meta가 빠지면 참조(GUID)가 끊겨 씬이 깨진다.
+/[Ll]ibrary.meta
+/[Tt]emp.meta
+/[Bb]uild.meta
+/[Ll]ogs.meta
+/[Uu]ser[Ss]ettings.meta

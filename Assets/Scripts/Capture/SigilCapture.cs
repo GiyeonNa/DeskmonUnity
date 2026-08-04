@@ -40,6 +40,18 @@ namespace Deskmon.Capture
         /// <summary>그리는 중인 획. 화면에 궤적을 그릴 때 읽는다.</summary>
         public IReadOnlyList<Vector2> Stroke => _stroke;
 
+        /// <summary>현재 문양의 진행 인덱스 (0부터). UI의 진행 점 표시에 쓴다.</summary>
+        public int Index => _index;
+
+        /// <summary>실패 흔들림 남은 시간. overlay.html wild.shakeT (0.4초).</summary>
+        public float ShakeT { get; private set; }
+
+        /// <summary>성공 플래시 남은 시간. overlay.html wild.okFlash (0.35초).</summary>
+        public float OkFlash { get; private set; }
+
+        /// <summary>UI 애니메이션용 누적 시간 (안내 빛점이 문양 경로를 도는 데 쓴다).</summary>
+        public float Time01 { get; private set; }
+
         /// <summary>문양 하나 성공.</summary>
         public event System.Action OnGlyphSuccess;
         /// <summary>판정 실패. 흔들림 연출용 - 페널티는 없다.</summary>
@@ -63,6 +75,8 @@ namespace Deskmon.Capture
             _drawing = false;
             _index = 0;
             _stroke.Clear();
+            ShakeT = 0f;
+            OkFlash = 0f;
 
             if (db?.balance != null)
                 _tolerance = db.balance.sigilTolerance;
@@ -135,6 +149,7 @@ namespace Deskmon.Capture
 
             if (name == _current && score >= _tolerance)
             {
+                OkFlash = 0.35f;
                 _index++;
                 if (_index >= _glyphs.Count)
                 {
@@ -149,8 +164,17 @@ namespace Deskmon.Capture
                 return true;
             }
 
+            ShakeT = 0.4f;
             OnGlyphFail?.Invoke();
             return false;
+        }
+
+        void Update()
+        {
+            float dt = Time.unscaledDeltaTime;
+            Time01 += dt;
+            if (ShakeT > 0f) ShakeT -= dt;
+            if (OkFlash > 0f) OkFlash -= dt;
         }
 
         /// <summary>야생이 떠났을 때 - 상태를 비운다.</summary>
@@ -163,6 +187,8 @@ namespace Deskmon.Capture
             _current = null;
             _index = 0;
             _target = null;
+            ShakeT = 0f;
+            OkFlash = 0f;
         }
 
         void RefreshCurrent()

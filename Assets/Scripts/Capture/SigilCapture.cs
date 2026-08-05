@@ -52,6 +52,20 @@ namespace Deskmon.Capture
         /// <summary>UI 애니메이션용 누적 시간 (안내 빛점이 문양 경로를 도는 데 쓴다).</summary>
         public float Time01 { get; private set; }
 
+        // ── 마지막 판정 결과 (진단용) ──
+        // 인식이 안 될 때 원인을 좁히려면 이 값들이 필요하다. 목표 점수는 높은데
+        // 분류가 다른 문양으로 갔다면 임계값을 낮춰도 소용없다 - Passes()가 분류 일치를
+        // 요구하기 때문이다.
+
+        /// <summary>마지막 획의 점 개수. 8 미만이면 판정 자체를 하지 않는다.</summary>
+        public int LastPointCount { get; private set; }
+        /// <summary>마지막 획이 무엇으로 분류됐는가.</summary>
+        public string LastRecognized { get; private set; }
+        /// <summary>그 분류의 점수.</summary>
+        public float LastScore { get; private set; }
+        /// <summary>목표 문양과의 직접 점수. 이게 높은데 실패하면 분류에서 밀린 것이다.</summary>
+        public float LastTargetScore { get; private set; }
+
         /// <summary>문양 하나 성공.</summary>
         public event System.Action OnGlyphSuccess;
         /// <summary>판정 실패. 흔들림 연출용 - 페널티는 없다.</summary>
@@ -145,6 +159,14 @@ namespace Deskmon.Capture
             }
 
             var (name, score) = SigilRecognizer.Recognize(_stroke);
+
+            // 실패 원인 추적용. 인식이 안 될 때 "무엇으로 인식됐고 목표 점수는 얼마였는지"를
+            // 남기지 않으면 임계값 문제인지 분류 문제인지 구분할 수 없다.
+            LastPointCount = _stroke.Count;
+            LastRecognized = name;
+            LastScore = score;
+            LastTargetScore = SigilRecognizer.Match(_stroke, _current);
+
             _stroke.Clear();
 
             if (name == _current && score >= _tolerance)

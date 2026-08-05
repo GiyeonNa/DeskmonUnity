@@ -32,7 +32,7 @@ namespace Deskmon.Capture
         /// <summary>패널이 차지하는 화면 영역. 여기 클릭은 각인 획으로 새지 않게 막는다.</summary>
         Rect _blocked;
 
-        const int PANEL_X = 12, PANEL_Y = 12, PANEL_W = 350, PANEL_H = 232;
+        const int PANEL_X = 12, PANEL_Y = 12, PANEL_W = 350, PANEL_H = 256;
 
         /// <summary>인식기가 아는 문양 전부. 전수 모드에서 쓴다.</summary>
         static readonly string[] AllGlyphs =
@@ -155,6 +155,20 @@ namespace Deskmon.Capture
 
             Row("포획 / 실패", $"{_captured} / {_failed}");
             Row("최근", _lastResult);
+
+            // 실패 원인 진단. 목표 점수는 높은데 분류가 다른 문양으로 갔다면 임계값을
+            // 낮춰도 소용없다 - 판정이 분류 일치를 요구하기 때문이다.
+            if (capture != null && capture.LastPointCount > 0)
+            {
+                bool classMismatch = capture.LastRecognized != null
+                                     && capture.LastRecognized != capture.CurrentGlyph;
+
+                string diag = $"{Label(capture.LastRecognized)} {capture.LastScore:F2}"
+                            + $" · 목표 {capture.LastTargetScore:F2}"
+                            + $" · {capture.LastPointCount}점";
+
+                Row("판정", classMismatch ? $"<color=#ff8f8f>{diag}</color>" : diag);
+            }
 
             GUILayout.Space(6);
 

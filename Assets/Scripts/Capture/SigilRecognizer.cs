@@ -38,6 +38,12 @@ namespace Deskmon.Capture
         /// <summary>변형 이름 -> 문양 이름. "spiral@2.5" -> "spiral"</summary>
         static readonly Dictionary<string, string> VariantOwner = new Dictionary<string, string>();
 
+        /// <summary>
+        /// 변형의 정규화 전 좌표. 거울상을 만들려면 원본 좌표가 필요하다
+        /// (정규화된 것은 이미 회전·스케일이 적용돼 있어 반전의 의미가 달라진다).
+        /// </summary>
+        static readonly Dictionary<string, Vector2[]> RawVariants = new Dictionary<string, Vector2[]>();
+
         /// <summary>문양 이름 -> 표시용 원본 좌표 (대표 변형 하나).</summary>
         static readonly Dictionary<string, Vector2[]> RawTemplates = new Dictionary<string, Vector2[]>();
 
@@ -300,6 +306,7 @@ namespace Deskmon.Capture
         {
             Templates[variantKey] = Normalize(pts);
             VariantOwner[variantKey] = owner;
+            RawVariants[variantKey] = pts;
         }
 
         static void BuildTemplates()
@@ -353,36 +360,78 @@ namespace Deskmon.Capture
         /// <summary>
         /// 사람이 실제로 그리는 방식의 변형들.
         ///
-        /// 왜 필요한가: 단일 템플릿은 "정확히 이 형태"만 인정한다. 그런데 화면의 고스트를
-        /// 보고 따라 그릴 때 사람은 바퀴 수를 세지 않고, 꺾임 수도 정확히 맞추지 않는다.
-        /// 나선을 2바퀴 기준으로만 두면 2.5바퀴를 그린 사람은 0.2점을 받는다 - 분명히
-        /// 나선을 그렸는데도 실패한다. 변형을 함께 등록해 그 폭을 인정한다.
+        /// 단일 템플릿은 "정확히 이 형태를 이 방향으로"만 인정한다. 화면의 고스트를 보고
+        /// 따라 그릴 때 사람은 시작 위치도 회전 방향도 제각각인데, 그것들이 전부 실패한다.
+        /// 실측한 실패 사례:
+        ///   나선을 시계 방향으로 그림     -> 0.47, 번개로 분류
+        ///   번개를 우상단에서 시작        -> 0.45, 물결로 분류
+        ///   번개를 아래에서 위로 그림     -> 0.45, 물결로 분류
+        /// 넷 중 셋이 실패하니 "20번 그려도 안 된다"가 나온다.
         ///
-        /// 반대 방향(예: 나선을 다른 문양으로 오분류)은 아래 검증에서 확인했다.
+        /// 임계값을 낮춰도 해결되지 않는다 - 판정이 분류 일치를 요구하는데(SigilCapture),
+        /// 이 경우 애초에 다른 문양이 이기기 때문이다.
+        ///
+        /// 획 방향 뒤집기(Candidates)로는 못 잡는다. 그것은 점 순서만 뒤집을 뿐
+        /// 거울상을 만들지 않는데, 시계/반시계나 좌우 반전은 거울 대칭이기 때문이다.
         /// </summary>
         static void AddDrawingVariants()
         {
             // ── 나선: 바퀴 수 ──
-            // 가장 취약했다. 사람은 바퀴를 세면서 그리지 않는다.
+            // 사람은 바퀴를 세면서 그리지 않는다. 2바퀴 고정이면 2.5바퀴가 0.2점이 된다.
             foreach (float turns in new[] { 1.25f, 1.5f, 2.5f, 3f })
                 AddVariant("spiral", $"spiral@{turns}", MakeSpiral(turns));
 
             // ── 물결: 진동 횟수 ──
-            // 기본은 한 주기(위아래 한 번)다. 두 번 꺾어 그리는 사람이 많다.
             AddVariant("wave", "wave@1.5", MakeWave(1.5f));
             AddVariant("wave", "wave@2", MakeWave(2f));
 
             // ── 번개: 꺾임 수 ──
-            // 기본은 3번 꺾인다. 2번이나 4번으로 그려도 번개로 인정한다.
-            AddVariant("zigzag", "zigzag@2", new[]
-            {
-                new Vector2(-1f, -1f), new Vector2(1f, -0.2f), new Vector2(-1f, 1f),
-            });
+            // 2꺾임 변형은 넣지 않는다. 꺾쇠(caret)도 2구간 꺾인 선이라 정규화 후 거의
+            // 같아지고, 실측에서 꺾쇠의 37%를 번개가 가져갔다. 번개의 정체성은 3꺾임이므로
+            // 2꺾임까지 인정할 이유가 없다 - 그렇게 그린 것은 실제로 꺾쇠에 가깝다.
             AddVariant("zigzag", "zigzag@4", new[]
             {
                 new Vector2(-1f, -1f), new Vector2(1f, -0.6f), new Vector2(-1f, -0.1f),
                 new Vector2(1f, 0.5f), new Vector2(-1f, 1f),
             });
+
+            // ── 거울상 (시작 위치 / 회전 방향) ──
+            // 지금까지 등록된 모든 변형에 좌우·상하 반전을 더한다. 마지막에 하는 이유는
+            // 위에서 넣은 변형들까지 함께 반전시키기 위해서다.
+            //
+            // 대칭 도형(원·사각형 등)은 반전해도 같은 모양이라 후보만 늘고 판정은 그대로다.
+            // 비대칭 도형(나선·번개·물결·꺾쇠)에서만 실질적인 효과가 있다.
+            AddMirrorVariants();
+        }
+
+        /// <summary>
+        /// 등록된 모든 변형의 좌우/상하/양쪽 반전을 추가한다.
+        ///
+        /// 반전을 문양별로 손으로 나열하지 않는 이유: 빠뜨리기 쉽고, 나중에 문양을
+        /// 추가할 때 같은 실수를 반복한다. 규칙으로 두면 자동으로 적용된다.
+        /// </summary>
+        static void AddMirrorVariants()
+        {
+            // 순회 중에 컬렉션을 수정할 수 없으므로 먼저 복사한다.
+            var seeds = new List<KeyValuePair<string, Vector2[]>>();
+            foreach (var kv in RawVariants) seeds.Add(kv);
+
+            foreach (var seed in seeds)
+            {
+                string owner = VariantOwner[seed.Key];
+                AddVariant(owner, seed.Key + "|mx", Mirror(seed.Value, true, false));
+                AddVariant(owner, seed.Key + "|my", Mirror(seed.Value, false, true));
+                AddVariant(owner, seed.Key + "|mxy", Mirror(seed.Value, true, true));
+            }
+        }
+
+        static Vector2[] Mirror(Vector2[] pts, bool flipX, bool flipY)
+        {
+            var a = new Vector2[pts.Length];
+            for (int i = 0; i < pts.Length; i++)
+                a[i] = new Vector2(flipX ? -pts[i].x : pts[i].x,
+                                   flipY ? -pts[i].y : pts[i].y);
+            return a;
         }
 
         /// <summary>나선 - turns 바퀴.</summary>

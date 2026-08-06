@@ -179,14 +179,20 @@ namespace Deskmon.EditorTools
                 sp.evolveCondition = r.evolve;
                 sp.pattern = r.pattern;
 
-                // 폼별 도트가 나오기 전까지는 플레이스홀더 1장을 전 폼이 공유한다.
-                var placeholder = AssetDatabase.LoadAssetAtPath<Sprite>($"{SPRITE_DIR}/{r.id}.png");
-                if (placeholder != null)
+                // 폼별 스프라이트 연결. 파일명 규칙:
+                //   <id>.png         = 기본형 (스테이지 0)
+                //   <id>_stage2.png  = 1차 진화형
+                //   <id>_stage3.png  = 2차 진화형
+                // 폼별 파일이 없으면 기본형을 재사용한다 - 도트가 폼별로 나오기 전까지의 상태.
+                if (sp.formSprites == null || sp.formSprites.Length != r.forms)
+                    sp.formSprites = new Sprite[r.forms];
+
+                var baseSprite = LoadFormSprite(r.id, 0);
+                for (int i = 0; i < r.forms; i++)
                 {
-                    if (sp.formSprites == null || sp.formSprites.Length != r.forms)
-                        sp.formSprites = new Sprite[r.forms];
-                    for (int i = 0; i < sp.formSprites.Length; i++)
-                        if (sp.formSprites[i] == null) sp.formSprites[i] = placeholder;
+                    var stageSprite = i == 0 ? baseSprite : LoadFormSprite(r.id, i);
+                    if (stageSprite != null) sp.formSprites[i] = stageSprite;
+                    else if (sp.formSprites[i] == null) sp.formSprites[i] = baseSprite;
                 }
 
                 EditorUtility.SetDirty(sp);
@@ -199,6 +205,47 @@ namespace Deskmon.EditorTools
             AssetDatabase.Refresh();
 
             Debug.Log($"[Deskmon] 데이터 임포트 완료 - 종 {Rows.Length} · 필드 {FieldRows.Length} -> {DATA_DIR}");
+        }
+
+        /// <summary>
+        /// 폼별 스프라이트 로드 + 픽셀아트 임포트 설정 강제.
+        ///
+        /// 설정을 여기서도 강제하는 이유: 손으로 그린 도트를 Assets/Sprites에 떨어뜨리면
+        /// Unity가 기본 설정(Bilinear·압축)으로 임포트한다. 그대로 두면 도트가 뭉개진
+        /// 채 연결되고, 원인이 임포트 설정이라는 것을 화면만 봐서는 알기 어렵다.
+        /// </summary>
+        static Sprite LoadFormSprite(string id, int stage)
+        {
+            string path = stage == 0
+                ? $"{SPRITE_DIR}/{id}.png"
+                : $"{SPRITE_DIR}/{id}_stage{stage + 1}.png";
+
+            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            if (sprite != null) ApplyPixelImportSettings(path);
+            return sprite;
+        }
+
+        /// <summary>포팅계획 §3.4의 픽셀아트 파이프라인. PlaceholderSpriteGen과 같은 값.</summary>
+        static void ApplyPixelImportSettings(string path)
+        {
+            var imp = AssetImporter.GetAtPath(path) as TextureImporter;
+            if (imp == null) return;
+
+            bool dirty = imp.textureType != TextureImporterType.Sprite
+                      || imp.filterMode != FilterMode.Point
+                      || imp.textureCompression != TextureImporterCompression.Uncompressed
+                      || imp.spritePixelsPerUnit != 100f
+                      || imp.mipmapEnabled;
+            if (!dirty) return;
+
+            imp.textureType = TextureImporterType.Sprite;
+            imp.spriteImportMode = SpriteImportMode.Single;
+            imp.filterMode = FilterMode.Point;
+            imp.textureCompression = TextureImporterCompression.Uncompressed;
+            imp.spritePixelsPerUnit = 100f;   // CreatureView.PixelsToUnits와 일치
+            imp.mipmapEnabled = false;
+            imp.alphaIsTransparency = true;
+            imp.SaveAndReimport();
         }
 
         /// <summary>있으면 로드, 없으면 생성. GUID를 지켜 기존 참조가 끊기지 않게 한다.</summary>

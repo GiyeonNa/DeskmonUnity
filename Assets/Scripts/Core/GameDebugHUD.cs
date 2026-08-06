@@ -150,9 +150,14 @@ namespace Deskmon.Core
             }
 
             // 왜 안 되는지 첫 이유를 보여준다 - "안 됨"만으로는 친밀도 부족인지 알 수 없다
+            bool anyFinal = false;
             foreach (var sp in game.db.species)
             {
                 if (sp == null) continue;
+
+                var c = game.Save.Creature(sp.id);
+                if (c.s[sp.forms - 1] > 0 || c.shiny[sp.forms - 1] > 0) anyFinal = true;
+
                 for (int st = 0; st < sp.forms - 1; st++)
                 {
                     var reason = EvolutionSystem.Check(game.Save, game.db, sp.id, st, false, w);
@@ -161,7 +166,9 @@ namespace Deskmon.Core
                         return $"진화 불가: {sp.NameAt(st)} - {ReasonText(reason, st)}";
                 }
             }
-            return "진화 대상 없음";
+
+            // "대상 없음"만으로는 이미 다 진화한 것인지 아무것도 없는 것인지 알 수 없다
+            return anyFinal ? "진화 대상 없음 - 보유 개체가 전부 최종형" : "진화 대상 없음";
         }
 
         string ReasonText(EvolutionSystem.BlockReason r, int stage)

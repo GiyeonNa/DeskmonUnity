@@ -47,7 +47,16 @@ namespace Deskmon.Core
             Save = SaveSystem.Load(db);
 
             if (db == null)
-                Debug.LogError("[GameState] DeskmonDatabase가 없습니다 - 메뉴 [Deskmon/데이터 임포트]를 먼저 실행하세요.");
+            {
+                // 어느 씬에서 났는지 같이 알린다. 대개는 데이터가 없는 것이 아니라
+                // 본 게임 씬이 아닌 다른 씬(스파이크/테스트)을 열어둔 채 Play를 누른 경우다.
+                string scene = UnityEngine.SceneManagement.SceneManager.GetActiveScene().name;
+                Debug.LogError(
+                    $"[GameState] DeskmonDatabase 참조가 비어 있습니다 (현재 씬: {scene}).\n" +
+                    "  - 다른 씬을 열어둔 상태라면 Assets/Scenes/Main.unity 를 여세요.\n" +
+                    "  - Main 씬인데도 비어 있다면 [Deskmon/본 게임 씬 생성]으로 다시 만드세요.\n" +
+                    "  - Assets/Data 가 비어 있다면 [Deskmon/데이터 임포트]부터 실행하세요.");
+            }
         }
 
         void Start()

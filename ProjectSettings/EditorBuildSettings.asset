@@ -6,7 +6,7 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/S0_Spike.unity
-    guid: 6129321aa00809142a22f603374ec9c6
+    path: Assets/Scenes/Main.unity
+    guid: 060f2a194d89d1342b82101a15ff177d
   m_configObjects: {}
   m_UseUCBPForAssetBundles: 0

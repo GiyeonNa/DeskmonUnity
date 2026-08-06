@@ -46,11 +46,20 @@ namespace Deskmon.Core
             if (Input.GetKeyDown(KeyCode.F1)) show = !show;
 
             // 즉시 출몰. 기다리지 않고 코어 루프를 확인하는 수단이다.
-            if (Input.GetKeyDown(KeyCode.F2) && scheduler != null && !scheduler.SpawnActive)
+            if (Input.GetKeyDown(KeyCode.F2))
             {
-                scheduler.Trigger(false);
-                _lastEvent = "강제 출몰 (F2)";
                 _eventT = 0f;
+
+                // 눌렀는데 아무 일도 안 일어나면 원인을 알 수 없다. 왜 안 됐는지 남긴다.
+                if (scheduler == null) _lastEvent = "출몰 실패: SpawnScheduler 없음 (Main 씬인가?)";
+                else if (scheduler.SpawnActive) _lastEvent = "이미 출몰 중";
+                else if (game?.Save == null) _lastEvent = "출몰 실패: 세이브 로드 안 됨";
+                else
+                {
+                    scheduler.Trigger(false);
+                    _lastEvent = scheduler.SpawnActive ? "강제 출몰 (F2)"
+                        : "출몰 실패: 조건에 맞는 종이 없음 (해금/시간 게이트 확인)";
+                }
             }
 
             // 저장 위치를 여는 것까지 넣어두면 세이브가 실제로 쓰이는지 바로 볼 수 있다.

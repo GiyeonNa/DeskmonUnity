@@ -102,8 +102,15 @@ namespace Deskmon.EditorTools
             // 빌드에는 본 게임 씬만 넣는다. 스파이크/테스트 씬은 개발용 도구다.
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(SCENE_PATH, true) };
 
+            // 만든 씬을 열어둔 채로 끝낸다.
+            // 이걸 안 하면 씬 파일만 생기고 에디터는 이전 씬(스파이크/테스트)에 머문다.
+            // 그 상태로 Play를 누르면 GameState가 없어 "데이터 임포트를 먼저" 오류가 나는데,
+            // 데이터는 멀쩡하므로 원인을 찾기가 어렵다.
+            EditorSceneManager.OpenScene(SCENE_PATH, OpenSceneMode.Single);
+
             Debug.Log($"[Deskmon] 본 게임 씬 생성 완료 -> {SCENE_PATH}\n" +
-                      "빌드 대상을 이 씬으로 바꿨습니다. 투명 오버레이는 빌드에서만 동작합니다.");
+                      "이 씬을 열어두었고 빌드 대상으로 등록했습니다. " +
+                      "투명 오버레이는 빌드에서만 동작합니다 (에디터 Play에서는 로직만 확인 가능).");
         }
     }
 }

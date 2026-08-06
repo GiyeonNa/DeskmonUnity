@@ -24,6 +24,9 @@ namespace Deskmon.Core
         string _lastEvent = "-";
         float _eventT;
 
+        /// <summary>내용 실측 높이. 첫 프레임은 대략값으로 시작해 다음 프레임부터 맞는다.</summary>
+        float _measuredHeight = 250f;
+
         void Start()
         {
             if (game == null) game = FindFirstObjectByType<GameState>();
@@ -178,9 +181,15 @@ namespace Deskmon.Core
             if (!show) return;
             EnsureStyles();
 
-            const int W = 330, H = 252;
-            GUI.Box(new Rect(12, 12, W, H), GUIContent.none, _box);
-            GUILayout.BeginArea(new Rect(24, 22, W - 24, H - 20));
+            // 높이를 고정하지 않는다. 줄이 조건부(숨김 경고/방목/최근)라 고정값은
+            // 반드시 어긋난다 - 실제로 방목 줄이 생기면서 아래가 잘렸다.
+            // 내용을 그리면서 실측하고, 배경은 지난 프레임 측정값으로 그린다
+            // (IMGUI는 그린 순서대로 쌓여서 배경을 나중에 그리면 글자를 덮는다).
+            // 한 프레임 늦는 것은 개발용 HUD에서 문제가 되지 않는다.
+            const int W = 330;
+            GUI.Box(new Rect(12, 12, W, _measuredHeight + 20f), GUIContent.none, _box);
+            GUILayout.BeginArea(new Rect(24, 22, W - 24, 2000f));
+            GUILayout.BeginVertical();
 
             GUILayout.Label("<b>데스크몬 (개발용 HUD)</b>", _style);
             GUILayout.Space(4);
@@ -236,6 +245,12 @@ namespace Deskmon.Core
             GUILayout.Space(4);
             GUILayout.Label("<size=11>F1 HUD · <b>F2 출몰</b> · F3 세이브 · <b>F4 방목</b> · F5 간식 · F6 진화\n" +
                             "방목 개체 클릭 = 쓰다듬기 · <b>종료: Ctrl+Alt+Q</b> (전역)</size>", _style);
+
+            GUILayout.EndVertical();
+
+            // 실측은 Repaint에서만 유효하다 - Layout 이벤트의 rect는 0이다.
+            if (Event.current.type == EventType.Repaint)
+                _measuredHeight = GUILayoutUtility.GetLastRect().height;
 
             GUILayout.EndArea();
         }

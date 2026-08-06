@@ -31,9 +31,7 @@ namespace Deskmon.UI
             header.fontStyle = FontStyle.Bold;
             UIKit.Fixed(header.gameObject, 0f, 20f);
 
-            _list = UIKit.VList(v, 3f, new RectOffset(0, 0, 0, 0));
-            UIKit.Fixed(_list.gameObject, 0f, 330f);
-            _list.gameObject.AddComponent<RectMask2D>();
+            _list = UIKit.ScrollList(v, 330f);
         }
 
         public void Refresh()

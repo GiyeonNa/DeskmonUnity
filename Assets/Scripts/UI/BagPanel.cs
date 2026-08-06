@@ -36,11 +36,8 @@ namespace Deskmon.UI
             _header.fontStyle = FontStyle.Bold;
             UIKit.Fixed(_header.gameObject, 0f, 20f);
 
-            _list = UIKit.VList(v, 3f, new RectOffset(0, 0, 0, 0));
-            UIKit.Fixed(_list.gameObject, 0f, 330f);
-
-            // 넘치면 잘라낸다 - 스크롤은 목록이 실제로 길어지는 S4에서 붙인다
-            _list.gameObject.AddComponent<RectMask2D>();
+            // 가방도 폼이 쌓이면 길어진다 - 도감과 같은 스크롤 목록을 쓴다
+            _list = UIKit.ScrollList(v, 330f);
         }
 
         public void Refresh()

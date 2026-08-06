@@ -173,6 +173,44 @@ namespace Deskmon.UI
             return (RectTransform)go.transform;
         }
 
+        /// <summary>
+        /// 스크롤되는 세로 목록. 반환값은 내용 컨테이너 - 여기에 줄을 붙인다.
+        ///
+        /// 목록이 영역보다 길어지면 마스크로 잘리기만 해서는 아래 요소를 볼 방법이
+        /// 없다 - 도감에서 필드를 해금하자마자 그렇게 됐다. 휠/드래그 둘 다 된다.
+        /// </summary>
+        public static RectTransform ScrollList(Transform parent, float height, float spacing = 3f)
+        {
+            var view = new GameObject("Scroll", typeof(RectTransform), typeof(Image),
+                                      typeof(RectMask2D), typeof(ScrollRect));
+            view.transform.SetParent(parent, false);
+            Fixed(view, 0f, height);
+
+            // 투명하지만 레이캐스트는 받는다 - 휠 이벤트가 닿으려면 Graphic이 필요하다
+            var img = view.GetComponent<Image>();
+            img.color = Color.clear;
+
+            var content = VList(view.transform, spacing, new RectOffset(0, 0, 0, 0));
+            content.anchorMin = new Vector2(0f, 1f);
+            content.anchorMax = new Vector2(1f, 1f);
+            content.pivot = new Vector2(0.5f, 1f);
+            content.sizeDelta = Vector2.zero;
+
+            // 내용 높이는 목록이 계산한 선호 크기를 따른다 - 이게 있어야 스크롤 범위가 생긴다
+            var fit = content.gameObject.AddComponent<ContentSizeFitter>();
+            fit.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
+
+            var sr = view.GetComponent<ScrollRect>();
+            sr.content = content;
+            sr.viewport = (RectTransform)view.transform;
+            sr.horizontal = false;
+            sr.vertical = true;
+            sr.movementType = ScrollRect.MovementType.Clamped;
+            sr.scrollSensitivity = 24f;
+
+            return content;
+        }
+
         /// <summary>고정 크기 요소 (레이아웃 그룹 안에서).</summary>
         public static LayoutElement Fixed(GameObject go, float w, float h)
         {

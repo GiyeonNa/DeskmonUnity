@@ -59,7 +59,7 @@ MonoBehaviour:
   baitEatDuration: 4
   roamBaseSlots: 2
   petCooldown: 30
-  petFriendGain: {x: 2, y: 5}
+  petBerryGain: {x: 2, y: 5}
   snackCost: 3
   playCooldown: 18
   playFriendGain: 3

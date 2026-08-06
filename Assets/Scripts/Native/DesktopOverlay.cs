@@ -144,6 +144,15 @@ namespace Deskmon
             // 클릭통과 상태에서는 Unity가 마우스 위치를 못 받으므로 OS 커서를 직접 읽는다.
             Vector2 cursor = NativeCursor.GetPositionInWindow();
 
+            // 사각 영역 (UI 카드/패널). 크리처의 원형 반경으로는 네모난 카드를 덮을 수
+            // 없다 - 원을 카드에 외접시키면 모서리 밖까지 입력을 먹어 뒤쪽 창을 가린다.
+            for (int i = _rectTargets.Count - 1; i >= 0; i--)
+            {
+                var t = _rectTargets[i];
+                if (t == null || !t.IsActive) { _rectTargets.RemoveAt(i); continue; }
+                if (t.ScreenRect.Contains(cursor)) return true;
+            }
+
             for (int i = _targets.Count - 1; i >= 0; i--)
             {
                 var t = _targets[i];
@@ -166,6 +175,23 @@ namespace Deskmon
         }
 
         public void Unregister(IInteractive t) => _targets.Remove(t);
+
+        public void Register(IInteractiveRect t)
+        {
+            if (!_rectTargets.Contains(t)) _rectTargets.Add(t);
+        }
+
+        public void Unregister(IInteractiveRect t) => _rectTargets.Remove(t);
+
+        readonly List<IInteractiveRect> _rectTargets = new List<IInteractiveRect>();
+    }
+
+    /// <summary>커서가 안에 있으면 클릭통과를 해제해야 하는 사각 영역 (UI 카드/패널).</summary>
+    public interface IInteractiveRect
+    {
+        /// <summary>스크린 사각 영역 (좌하단 원점).</summary>
+        Rect ScreenRect { get; }
+        bool IsActive { get; }
     }
 
     /// <summary>커서가 가까이 오면 클릭통과를 해제해야 하는 대상.</summary>

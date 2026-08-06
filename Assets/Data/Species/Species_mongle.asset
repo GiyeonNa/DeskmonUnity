@@ -25,8 +25,8 @@ MonoBehaviour:
   - "\uAF43\uBABD\uC774"
   formSprites:
   - {fileID: 21300000, guid: 1956feb3e2c90cc43b0658c0bb870120, type: 3}
-  - {fileID: 21300000, guid: 1956feb3e2c90cc43b0658c0bb870120, type: 3}
-  - {fileID: 21300000, guid: 1956feb3e2c90cc43b0658c0bb870120, type: 3}
+  - {fileID: 21300000, guid: 3a70c5d9f96640b692ab4d1ee78b0ddc, type: 3}
+  - {fileID: 21300000, guid: 75a6813ae9ce42bf9d307404eb9e2742, type: 3}
   bodyColor: {r: 0.56078434, g: 0.8509804, b: 0.46666667, a: 1}
   shinyColor: {r: 0.9607843, g: 0.6392157, b: 0.8156863, a: 1}
   rainbow: 0

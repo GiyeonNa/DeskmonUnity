@@ -91,8 +91,9 @@ namespace Deskmon.EditorTools
 
             EditorSceneManager.SaveScene(scene, SCENE_PATH);
 
-            // 빌드 설정에 씬 등록
-            EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(SCENE_PATH, true) };
+            // 빌드 대상은 건드리지 않는다. 스파이크는 투명 창을 확인하는 도구이지
+            // 배포물이 아니다 - 예전에 여기서 빌드 설정을 덮어써서 본 게임 대신
+            // 스파이크가 빌드되고 있었다. 본 게임 씬은 [Deskmon/본 게임 씬 생성]이 등록한다.
 
             Debug.Log($"[Deskmon] S0 스파이크 씬 생성 완료 → {SCENE_PATH}\n" +
                       "빌드해서 실행하세요. 에디터에서는 투명 창이 적용되지 않습니다 (의도된 동작).");

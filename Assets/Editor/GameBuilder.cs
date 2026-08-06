@@ -8,20 +8,20 @@ using Debug = UnityEngine.Debug;
 namespace Deskmon.EditorTools
 {
     /// <summary>
-    /// S0 스파이크 빌드. 투명 창은 에디터에서 검증할 수 없으므로 빌드가 곧 테스트다.
+    /// 본 게임 빌드. 투명 창은 에디터에서 검증할 수 없으므로 빌드가 곧 테스트다.
     ///
     /// 메뉴: [Deskmon/S0 빌드 & 실행]
-    /// CLI:  Unity.exe -quit -batchmode -projectPath . -executeMethod Deskmon.EditorTools.BuildSpike.CI
+    /// CLI:  Unity.exe -quit -batchmode -projectPath . -executeMethod Deskmon.EditorTools.GameBuilder.CI
     /// </summary>
-    public static class BuildSpike
+    public static class GameBuilder
     {
-        const string OUT_DIR = "Build/S0";
+        const string OUT_DIR = "Build/Deskmon";
         const string EXE = "Deskmon.exe";
 
-        [MenuItem("Deskmon/S0 빌드 후 실행")]
+        [MenuItem("Deskmon/빌드 후 실행")]
         public static void BuildAndRun() => Run(true);
 
-        [MenuItem("Deskmon/S0 빌드만")]
+        [MenuItem("Deskmon/빌드만")]
         public static void BuildOnly() => Run(false);
 
         /// <summary>CLI용 — 실패 시 exit code 1.</summary>
@@ -54,8 +54,10 @@ namespace Deskmon.EditorTools
             var scenes = EditorBuildSettings.scenes;
             if (scenes == null || scenes.Length == 0)
             {
-                Debug.LogWarning("[Deskmon] 빌드 씬이 없습니다. S0 씬을 먼저 만듭니다.");
-                SpikeSceneBuilder.Build();
+                // 본 게임 씬을 만든다. 예전에는 여기서 스파이크 씬을 만들었는데,
+                // 그러면 배포물에 검증용 HUD와 고정 크리처가 들어간다.
+                Debug.LogWarning("[Deskmon] 빌드 씬이 없습니다. 본 게임 씬을 먼저 만듭니다.");
+                MainSceneBuilder.Build();
                 scenes = EditorBuildSettings.scenes;
             }
 

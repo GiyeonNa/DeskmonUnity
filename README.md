@@ -7,12 +7,14 @@
 - **원본**: Electron 프로토타입 (동작 "정답지"로 사용)
 - **기획**: `데스크몬_기획서_v4.md` · **포팅 계획**: `데스크몬_Unity포팅계획.md`
 
-## 현재 상태 — S0 하드파트 스파이크
+## 현재 상태 — S2 코어 루프 완료
 
-포팅계획 §4의 6단계(S0~S5) 중 **S0 코드 완료**. 배치 빌드 통과, 실행 검증 진행 중.
+포팅계획 §4의 6단계(S0~S5) 중 **S0~S2 코드 완료**. 다음은 S3.
 
-S0의 목표는 "이게 되면 나머지는 번역"인 리스크 제거다 —
-투명·클릭통과·항상위 전체화면 창 + 크리처 1마리 산책 + 커서 근접 시 클릭통과 해제.
+S2의 DoD "한 종을 잡아 도감에 등록"이 성립한다 —
+출몰 스케줄 → 각인 포획 → 포획 연출 → 도감 등록 → 저장.
+
+### 런타임 (`Assets/Scripts/`)
 
 | 영역 | 파일 | 내용 |
 |---|---|---|
@@ -21,13 +23,24 @@ S0의 목표는 "이게 되면 나머지는 번역"인 리스크 제거다 —
 | 안전장치 | `Native/Killswitch.cs` | Ctrl+Alt+Q 전역 핫키 + 폴링 + 워치독 + 검은화면 자동 종료 |
 | 커서 | `Native/NativeCursor.cs` | 클릭통과 중 커서를 읽기 위한 GetCursorPos 폴링 |
 | 유휴 | `Native/IdleTime.cs` | GetLastInputInfo (32비트 래핑 처리) |
-| 크리처 | `Creatures/CreatureView.cs` | 산책 상태머신 + 부피보존 스쿼시·플립·홉 |
-| HUD | `SpikeHUD.cs` | S0 검증용 오버레이 (F1 토글) — 본 게임에는 미포함 |
+| 데이터 | `Core/SpeciesData` `FieldData` `BalanceData` `DeskmonDatabase` | `data.js` 1:1 이전 (ScriptableObject) |
+| 세이브 | `Core/SaveData` `SaveSystem` | 원본 JSON 스키마 유지 + `migrateV4` + 원자적 쓰기 |
+| 진행 | `Core/CreatureRegistry` | 도감 등록, 마일스톤, 생산량 |
+| 루프 | `Core/GameState` `SpawnScheduler` | 출몰 → 포획 → 등록 → 저장을 잇는 지점 |
+| 포획 | `Capture/SigilRecognizer` | $1 Unistroke 이식. 문양 8종 + 그리기 변형·거울상 |
+| | `Capture/SigilCapture` `SigilInput` `SigilUI` | 각인 판정 / 입력 / 렌더 |
+| | `Capture/WildBehavior` | 접근 난이도 (느긋함·겁쟁이·순간이동) |
+| | `Capture/CaptureEffects` `CaughtAnimation` | 링·하트·반짝임, 날아가기 |
+| 크리처 | `Creatures/CreatureView` `CreatureAppearance` | 산책 모션 / 팔레트 스왑·아웃라인 |
 
-### 남은 검증
+### 개발용 (배포물에 미포함)
+
+`SpikeHUD` · `Capture/SigilTestHarness` — 검증 HUD.
+씬 `S0_Spike` · `SigilTest`, 그리고 `Editor/` 의 씬 생성기와 자가 점검 도구.
+
+### 남은 검증 (S0)
 
 - [ ] 통과 상태에서 뒤쪽 창/바탕화면 아이콘이 실제로 클릭되는가
-- [ ] 크리처에 커서를 대면 통과가 풀리고 HUD "클릭 수신"이 오르는가
 - [ ] `IsForegroundFullscreen()` 오탐 여부 — 최대화 창을 전체화면으로 잘못 잡는지
 - [ ] 멀티모니터 · DPI 배율 환경 (포팅계획 §6 최우선 리스크)
 
@@ -36,34 +49,46 @@ S0의 목표는 "이게 되면 나머지는 번역"인 리스크 제거다 —
 UniWinC는 UPM git 의존성이라 최초 열기 때 자동으로 받아온다 (`Packages/manifest.json`,
 버전은 `packages-lock.json`에 해시로 고정).
 
-에디터 메뉴:
+**처음 열었다면 순서대로:**
 
-- `Deskmon/S0 스파이크 씬 생성` — 씬을 코드로 재생성 (손으로 만든 씬은 재현이 안 된다)
-- `Deskmon/S0 빌드 후 실행`
+1. `Deskmon/데이터 임포트 (data.js -> 에셋)` — 종 12·필드 4 에셋 생성
+2. `Deskmon/본 게임 씬 생성` — `Assets/Scenes/Main.unity` + 빌드 대상 등록
+3. `Deskmon/빌드 후 실행`
 
 CLI (배치 빌드):
 
 ```sh
 Unity.exe -quit -batchmode -nographics \
   -projectPath . \
-  -executeMethod Deskmon.EditorTools.BuildSpike.CI \
+  -executeMethod Deskmon.EditorTools.GameBuilder.CI \
   -logFile build.log
 ```
 
-산출물은 `Build/S0/Deskmon.exe` (저장소에서 제외됨).
+산출물은 `Build/Deskmon/Deskmon.exe` (저장소에서 제외됨).
+
+### 검증 도구
+
+- `Deskmon/각인 UI 테스트 씬 생성` — 문양을 직접 그려본다. 이전/다음으로 8종 순회
+- `Deskmon/각인 인식 자가 점검` — 문양 추가 후 회귀 확인 (자기 분류·거울상·출제 정합)
+- `Deskmon/S0 스파이크 씬 생성` — 투명 창만 떼어내 확인. 빌드 대상은 바꾸지 않는다
 
 > **종료는 Ctrl+Alt+Q.** 이 앱은 포커스를 받지 않고 Alt+Tab·작업표시줄에도 뜨지 않는다.
 > 렌더가 잘못되면 작업 관리자 외에 끌 방법이 없어서 전역 핫키가 안전장치로 항상 들어간다.
 
 ## 앞으로
 
-| 단계 | 내용 |
-|---|---|
-| S1 | 픽셀 크리처 — 정지 스프라이트 + 코드 모션, 팔레트스왑 샤이니, 초기 6종 |
-| S2 | 코어 루프 — 출몰 스케줄 → 각인 포획 → 데이터/세이브 (JSON 스키마 유지) |
-| S3 | 시스템 — 방목·친밀도·진화, 코너 카드 UI, 도감/가방/설정 |
-| S4 | 콘텐츠 — 필드 4·종 12, 진영, 크로노, 출몰 조건 매트릭스 |
-| S5 | 폴리시·패키징 — 오디오·파티클, 서명된 .exe |
+| 단계 | 내용 | 상태 |
+|---|---|---|
+| S1 | 픽셀 크리처 — 정지 스프라이트 + 코드 모션, 팔레트스왑 샤이니 | 코드 완료 · **도트 6종 제작 남음** |
+| S2 | 코어 루프 — 출몰 → 각인 포획 → 연출 → 데이터/세이브 | 완료 |
+| S3 | 시스템 — 방목·친밀도·진화, 코너 카드 UI, 도감/가방/설정 | 다음 |
+| S4 | 콘텐츠 — 필드 4·종 12, 진영, 크로노, 출몰 조건 매트릭스 | |
+| S5 | 폴리시·패키징 — 오디오·파티클, 서명된 .exe | |
+
+**S3 시작 전 필요한 결정** — 기획서 v4 §11의 열린 결정 중 *방목 최대 슬롯 수*(5 가안).
+UI 레이아웃이 여기 물린다.
+
+아트는 `Docs/픽셀_스타일_가이드.md` 기준. 현재 스프라이트는 코드 생성 플레이스홀더다.
 
 ## 참고 — 폐기한 접근
 

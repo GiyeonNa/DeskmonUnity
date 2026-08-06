@@ -51,7 +51,11 @@ namespace Deskmon.Native
         const int VK_CONTROL = 0x11;
         const int VK_MENU = 0x12;    // Alt
 
+#if !UNITY_EDITOR
+        // 핫키 등록은 빌드에서만 한다. 에디터에서는 선언 자체를 빼야 "쓰지 않는 필드"
+        // 경고가 나지 않는다.
         bool _hotkeyRegistered;
+#endif
         float _lastHeartbeat;
         bool _quitting;
 

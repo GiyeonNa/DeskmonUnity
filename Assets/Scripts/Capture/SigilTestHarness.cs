@@ -49,19 +49,37 @@ namespace Deskmon.Capture
             }
         }
 
+        CaptureEffects _effects;
+
         void Start()
         {
             if (capture == null) capture = GetComponent<SigilCapture>();
+
+            // 포획 연출도 여기서 확인한다 - 실제 출몰 없이는 볼 방법이 없다.
+            _effects = GetComponent<CaptureEffects>() ?? gameObject.AddComponent<CaptureEffects>();
+
             Restart();
 
-            capture.OnGlyphSuccess += () => _lastResult = "문양 성공";
+            capture.OnGlyphSuccess += () =>
+            {
+                _lastResult = "문양 성공";
+                _effects.PlayGlyphSuccess(SelfScreenPos());
+            };
             capture.OnGlyphFail += () => { _failed++; _lastResult = "실패 - 다시"; };
             capture.OnCaptured += () =>
             {
                 _captured++;
                 _lastResult = "포획!";
-                Invoke(nameof(Restart), 0.8f);
+                _effects.PlayCatch(SelfScreenPos());
+                Invoke(nameof(Restart), 1.2f);
             };
+        }
+
+        Vector2 SelfScreenPos()
+        {
+            var cam = Camera.main;
+            return cam != null ? (Vector2)cam.WorldToScreenPoint(transform.position)
+                               : new Vector2(Screen.width * 0.5f, Screen.height * 0.5f);
         }
 
         /// <summary>
@@ -97,6 +115,13 @@ namespace Deskmon.Capture
             if (Input.GetKeyDown(KeyCode.R)) Restart();
             if (Input.GetKeyDown(KeyCode.B)) capture.ApplyBait();
             if (Input.GetKeyDown(KeyCode.A)) ToggleAllGlyphMode();
+
+            // 포획 연출만 따로 확인 - 문양을 다 그리지 않고도 볼 수 있게.
+            if (Input.GetKeyDown(KeyCode.C) && _effects != null)
+            {
+                _effects.PlayCatch(SelfScreenPos());
+                _lastResult = "연출 재생 (C)";
+            }
 
             // 좌우 방향키로도 순회한다 - 그리다가 마우스를 떼지 않고 넘길 수 있게.
             if (Input.GetKeyDown(KeyCode.LeftArrow)) Step(-1);
@@ -198,7 +223,7 @@ namespace Deskmon.Capture
             GUILayout.Space(4);
             GUILayout.Label("<size=11>점선 문양을 마우스로 따라 그리세요. 판정에 실패해도\n" +
                             "이전/다음(또는 방향키)으로 넘겨 전부 확인할 수 있습니다.\n" +
-                            "A 전수/추첨 · 1~4 희귀도 · B 미끼 · R 새 각인</size>", _style);
+                            "A 전수/추첨 · 1~4 희귀도 · B 미끼 · R 새 각인 · C 포획 연출</size>", _style);
 
             GUILayout.EndArea();
         }

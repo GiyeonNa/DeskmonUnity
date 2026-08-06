@@ -36,6 +36,7 @@ namespace Deskmon.Core
         public event System.Action<CreatureRegistry.CatchResult> OnCaught;
 
         GameObject _wild;
+        CaptureEffects _effects;
         SigilCapture _capture;
         float _autosaveT;
         double _prodAccum;
@@ -146,7 +147,20 @@ namespace Deskmon.Core
             var ui = _wild.GetComponent<SigilUI>() ?? _wild.AddComponent<SigilUI>();
             ui.wildTarget = _wild.transform;
 
-            _capture.OnCaptured += () => HandleCaptured(species, shiny);
+            // 연출은 야생과 다른 오브젝트에 둔다. 개체가 사라진 뒤에도 반짝임과
+            // 궤적이 남아 있어야 하는데, 같은 오브젝트에 붙이면 함께 파괴된다.
+            var effects = EnsureEffects();
+
+            var caughtAnim = _wild.GetComponent<CaughtAnimation>() ?? _wild.AddComponent<CaughtAnimation>();
+            caughtAnim.effects = effects;
+            caughtAnim.enabled = false;   // 포획 전까지는 돌지 않는다
+
+            _capture.OnGlyphSuccess += () =>
+            {
+                if (_wild != null) effects.PlayGlyphSuccess(ScreenPosOf(_wild.transform));
+            };
+
+            _capture.OnCaptured += () => HandleCaptured(species, shiny, behavior, caughtAnim);
             behavior.OnLeave += HandleLeave;
         }
 
@@ -158,7 +172,14 @@ namespace Deskmon.Core
             return Random.Range(db.balance.stayDuration.x, db.balance.stayDuration.y) + 10f;
         }
 
-        void HandleCaptured(SpeciesData species, bool shiny)
+        /// <summary>
+        /// 포획 확정. 도감 등록은 즉시 하고, 개체 정리는 연출이 끝난 뒤로 미룬다.
+        ///
+        /// 등록을 먼저 하는 이유: 연출 도중 앱이 종료되면(Ctrl+Alt+Q) 잡은 것이
+        /// 사라진다. 화면에 보이는 것보다 세이브가 먼저다.
+        /// </summary>
+        void HandleCaptured(SpeciesData species, bool shiny,
+                            WildBehavior behavior, CaughtAnimation anim)
         {
             var result = CreatureRegistry.Add(Save, db, species, shiny);
             SaveSystem.Save(Save);
@@ -167,7 +188,34 @@ namespace Deskmon.Core
                       + (result.berryGained > 0 ? $" 베리 +{result.berryGained}" : ""));
 
             OnCaught?.Invoke(result);
-            ClearWild();
+
+            // 연출 중에는 산책을 멈춘다 - 날아가는 중에 AI가 위치를 덮어쓰면 궤적이 튄다.
+            if (behavior != null) behavior.enabled = false;
+
+            if (anim != null)
+            {
+                anim.enabled = true;
+                anim.OnFinished += ClearWild;
+                anim.Begin();
+            }
+            else ClearWild();
+        }
+
+        Vector2 ScreenPosOf(Transform t)
+        {
+            var cam = Camera.main;
+            return cam != null ? (Vector2)cam.WorldToScreenPoint(t.position) : Vector2.zero;
+        }
+
+        /// <summary>연출 전용 오브젝트. 야생보다 오래 살아야 하므로 따로 두고 재사용한다.</summary>
+        CaptureEffects EnsureEffects()
+        {
+            if (_effects != null) return _effects;
+
+            var go = new GameObject("CaptureEffects");
+            go.transform.SetParent(transform, false);
+            _effects = go.AddComponent<CaptureEffects>();
+            return _effects;
         }
 
         void HandleLeave() => ClearWild();

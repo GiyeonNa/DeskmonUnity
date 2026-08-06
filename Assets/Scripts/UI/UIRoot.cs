@@ -244,7 +244,7 @@ namespace Deskmon.UI
             _cardRoam = UIKit.Label(list, "방목 0/2", 12, UIKit.TextSub);
             UIKit.Fixed(_cardRoam.gameObject, 0f, 16f);
 
-            // 패널 버튼
+            // 패널 버튼 - 탭 아이콘이 있으면 왼쪽에 붙인다
             var btns = UIKit.HRow(list, 26f);
             foreach (var name in new[] { "가방", "도감", "설정" })
             {
@@ -252,6 +252,18 @@ namespace Deskmon.UI
                 var b = UIKit.Button(btns, name, 13, new Vector2(72f, 24f),
                                      () => TogglePanel(captured));
                 UIKit.Fixed(b.gameObject, 72f, 24f);
+
+                Sprite tabIcon = theme == null ? null
+                    : captured == "가방" ? theme.iconBag
+                    : captured == "도감" ? theme.iconDex
+                    : theme.iconGear;
+                if (tabIcon != null)
+                {
+                    var ic = UIKit.SpriteIcon(b.transform, tabIcon, 14f);
+                    var irt = (RectTransform)ic.transform;
+                    irt.anchorMin = irt.anchorMax = irt.pivot = new Vector2(0f, 0.5f);
+                    irt.anchoredPosition = new Vector2(6f, 0f);
+                }
             }
 
             // 패널 호스트 - 카드 위쪽에 붙는다

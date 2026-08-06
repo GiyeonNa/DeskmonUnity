@@ -43,6 +43,7 @@ namespace Deskmon.Capture
         void OnDestroy()
         {
             if (_mat != null) DestroyImmediate(_mat);
+            if (_texMat != null) DestroyImmediate(_texMat);
         }
 
         Material Mat
@@ -156,6 +157,53 @@ namespace Deskmon.Capture
             }
         }
 
+        // ── 테마 스프라이트 드로잉 ──
+        // UI 이미지(fx_heart/fx_spark/fx_ring)가 승인되면 벡터 드로잉 대신 도트를 쓴다.
+        // 없는 것은 각자 벡터로 폴백한다 - 셋이 따로따로 승인될 수 있다.
+
+        Material _texMat;
+
+        Material TexMat
+        {
+            get
+            {
+                if (_texMat != null) return _texMat;
+                // UI/Default는 씬에 Canvas가 있으면 항상 빌드에 포함된다.
+                var shader = Shader.Find("UI/Default");
+                if (shader == null) shader = Shader.Find("Sprites/Default");
+                if (shader == null) return null;
+                _texMat = new Material(shader) { hideFlags = HideFlags.HideAndDontSave };
+                return _texMat;
+            }
+        }
+
+        /// <summary>텍스처를 지정하고 SetPass. 이후 DrawSpriteQuad가 그 텍스처로 그린다.</summary>
+        bool BeginSprite(Sprite s)
+        {
+            var mat = TexMat;
+            if (mat == null || s == null) return false;
+            mat.mainTexture = s.texture;
+            mat.SetPass(0);
+            return true;
+        }
+
+        static void DrawSpriteQuad(Sprite s, Vector2 c, float size, Color col)
+        {
+            var tex = s.texture;
+            Rect r = s.textureRect;
+            float u0 = r.x / tex.width, v0 = r.y / tex.height;
+            float u1 = (r.x + r.width) / tex.width, v1 = (r.y + r.height) / tex.height;
+            float h = size * 0.5f;
+
+            GL.Begin(GL.QUADS);
+            GL.Color(col);
+            GL.TexCoord2(u0, v0); GL.Vertex3(c.x - h, c.y - h, 0f);
+            GL.TexCoord2(u1, v0); GL.Vertex3(c.x + h, c.y - h, 0f);
+            GL.TexCoord2(u1, v1); GL.Vertex3(c.x + h, c.y + h, 0f);
+            GL.TexCoord2(u0, v1); GL.Vertex3(c.x - h, c.y + h, 0f);
+            GL.End();
+        }
+
         void OnRenderObject()
         {
             if (_rings.Count == 0 && _hearts.Count == 0
@@ -164,34 +212,87 @@ namespace Deskmon.Capture
             if (_cam == null) _cam = Camera.main;
             if (Camera.current != _cam) return;
 
-            Mat.SetPass(0);
+            var theme = Deskmon.UI.UIKit.Theme;
+            var sparkSprite = theme != null ? theme.fxSpark : null;
+            var ringSprite = theme != null ? theme.fxRing : null;
+            var heartSprite = theme != null ? theme.fxHeart : null;
+
             GL.PushMatrix();
             GL.LoadPixelMatrix();
 
-            foreach (var t in _trails)
+            // 같은 텍스처끼리 묶어 SetPass 횟수를 줄인다 (spark은 궤적과 반짝임이 공유)
+            if (sparkSprite != null && BeginSprite(sparkSprite))
             {
-                var c = sparkColor; c.a = (1f - t.t / 0.4f) * 0.8f;
-                DrawStar(t.pos, 3f, c);
+                foreach (var t in _trails)
+                {
+                    var c = Color.white; c.a = (1f - t.t / 0.4f) * 0.8f;
+                    DrawSpriteQuad(sparkSprite, t.pos, 12f, c);
+                }
+                foreach (var s in _sparks)
+                {
+                    var c = Color.white; c.a = 1f - s.t / 0.8f;
+                    DrawSpriteQuad(sparkSprite, s.pos, 16f, c);
+                }
             }
 
-            foreach (var r in _rings)
+            if (ringSprite != null && BeginSprite(ringSprite))
             {
-                float p = r.t / 0.5f;
-                var c = ringColor; c.a = 1f - p;
-                DrawRing(r.pos, 10f + (r.max - 10f) * p, 2.5f, c);
+                foreach (var r in _rings)
+                {
+                    float p = r.t / 0.5f;
+                    var c = Color.white; c.a = 1f - p;
+                    // 도트 링을 지름에 맞춰 늘린다 - 확대 앨리어싱은 0.5초 연출이라 허용
+                    DrawSpriteQuad(ringSprite, r.pos, (10f + (r.max - 10f) * p) * 2f, c);
+                }
             }
 
-            foreach (var h in _hearts)
+            if (heartSprite != null && BeginSprite(heartSprite))
             {
-                if (h.t < 0f) continue;   // 아직 뜰 차례가 아니다
-                var c = heartColor; c.a = 1f - h.t;
-                DrawHeart(h.pos + new Vector2(0f, h.t * 28f), 6f, c);
+                foreach (var h in _hearts)
+                {
+                    if (h.t < 0f) continue;
+                    var c = Color.white; c.a = 1f - h.t;
+                    DrawSpriteQuad(heartSprite, h.pos + new Vector2(0f, h.t * 28f), 20f, c);
+                }
             }
 
-            foreach (var s in _sparks)
+            // ── 벡터 폴백 (이미지가 없는 것만) ──
+            bool needVector = (sparkSprite == null && (_trails.Count > 0 || _sparks.Count > 0))
+                           || (ringSprite == null && _rings.Count > 0)
+                           || (heartSprite == null && _hearts.Count > 0);
+            if (needVector)
             {
-                var c = sparkColor; c.a = 1f - s.t / 0.8f;
-                DrawStar(s.pos, 3.5f, c);
+                Mat.SetPass(0);
+
+                if (sparkSprite == null)
+                {
+                    foreach (var t in _trails)
+                    {
+                        var c = sparkColor; c.a = (1f - t.t / 0.4f) * 0.8f;
+                        DrawStar(t.pos, 3f, c);
+                    }
+                    foreach (var s in _sparks)
+                    {
+                        var c = sparkColor; c.a = 1f - s.t / 0.8f;
+                        DrawStar(s.pos, 3.5f, c);
+                    }
+                }
+
+                if (ringSprite == null)
+                    foreach (var r in _rings)
+                    {
+                        float p = r.t / 0.5f;
+                        var c = ringColor; c.a = 1f - p;
+                        DrawRing(r.pos, 10f + (r.max - 10f) * p, 2.5f, c);
+                    }
+
+                if (heartSprite == null)
+                    foreach (var h in _hearts)
+                    {
+                        if (h.t < 0f) continue;
+                        var c = heartColor; c.a = 1f - h.t;
+                        DrawHeart(h.pos + new Vector2(0f, h.t * 28f), 6f, c);
+                    }
             }
 
             GL.PopMatrix();

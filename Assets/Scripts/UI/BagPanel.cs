@@ -87,10 +87,21 @@ namespace Deskmon.UI
             var icon = UIKit.SpriteIcon(row, sp.SpriteAt(stage), 32f);
             UIKit.Fixed(icon.gameObject, 32f, 32f);
 
+            // 샤이니 표시 - 아이콘이 있으면 반짝 별을 크리처 아이콘 모서리에 겹친다.
+            // 텍스트 "S"보다 자리도 안 먹고 도감의 금색 칸과 같은 문법이 된다.
+            bool sparkleIcon = shiny && UIKit.Theme != null && UIKit.Theme.iconSparkle != null;
+            if (sparkleIcon)
+            {
+                var spark = UIKit.SpriteIcon(icon.transform, UIKit.Theme.iconSparkle, 12f);
+                var srt = (RectTransform)spark.transform;
+                srt.anchorMin = srt.anchorMax = srt.pivot = new Vector2(1f, 1f);
+                srt.anchoredPosition = Vector2.zero;
+            }
+
             // 이름 + 수량 + 친밀. 샤이니는 금색으로 구분한다.
             int lv = FriendshipSystem.Level(save, db.balance, sp.id, stage);
             var name = UIKit.Label(row,
-                $"{sp.NameAt(stage)}{(shiny ? " S" : "")} x{count}\n친밀 Lv{lv}",
+                $"{sp.NameAt(stage)}{(shiny && !sparkleIcon ? " S" : "")} x{count}\n친밀 Lv{lv}",
                 11, shiny ? UIKit.TextGold : UIKit.TextMain);
             UIKit.Fixed(name.gameObject, 86f, 40f);
 

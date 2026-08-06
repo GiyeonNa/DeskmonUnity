@@ -119,17 +119,43 @@ namespace Deskmon.UI
                                    seen ? UIKit.TextMain : UIKit.TextSub);
             UIKit.Fixed(name.gameObject, 92f, 26f);
 
-            // 폼 칸 - 수집한 폼은 초록, 샤이니까지 있으면 금색 테두리 대신 금색 칸
+            // 폼 칸 - 수집한 폼은 초록, 샤이니까지 있으면 금색
+            var theme = UIKit.Theme;
             for (int f = 0; f < sp.forms; f++)
             {
                 var cell = new GameObject("Form", typeof(RectTransform), typeof(Image));
                 cell.transform.SetParent(row, false);
                 var img = cell.GetComponent<Image>();
                 img.raycastTarget = false;
-                img.color = dx.shinyForms[f] ? UIKit.TextGold
-                          : dx.forms[f] ? UIKit.Accent
-                          : new Color(1f, 1f, 1f, 0.12f);
                 UIKit.Fixed(cell, 14f, 14f);
+
+                Color state = dx.shinyForms[f] ? UIKit.TextGold
+                            : dx.forms[f] ? UIKit.Accent
+                            : Color.clear;
+
+                if (theme != null && theme.frameCell != null)
+                {
+                    // 홈 프레임 + 수집 상태를 안쪽 채움으로. 프레임이 빈 칸을 표현하므로
+                    // 미수집이어도 칸 자체는 보인다 - "여기 채울 자리가 있다"는 정보다.
+                    img.sprite = theme.frameCell;
+                    img.color = Color.white;
+
+                    if (state != Color.clear)
+                    {
+                        var fill = new GameObject("Fill", typeof(RectTransform), typeof(Image));
+                        fill.transform.SetParent(cell.transform, false);
+                        var frt = (RectTransform)fill.transform;
+                        frt.anchorMin = Vector2.zero; frt.anchorMax = Vector2.one;
+                        frt.offsetMin = new Vector2(3f, 3f); frt.offsetMax = new Vector2(-3f, -3f);
+                        var fimg = fill.GetComponent<Image>();
+                        fimg.color = state;
+                        fimg.raycastTarget = false;
+                    }
+                }
+                else
+                {
+                    img.color = state == Color.clear ? new Color(1f, 1f, 1f, 0.12f) : state;
+                }
             }
 
             if (dx.milestone)

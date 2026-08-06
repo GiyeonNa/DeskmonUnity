@@ -43,10 +43,10 @@ namespace Deskmon.Core
         {
             _eventT += Time.unscaledDeltaTime;
 
-            if (Input.GetKeyDown(KeyCode.F1)) show = !show;
+            if (GlobalKey.Down(KeyCode.F1)) show = !show;
 
             // 즉시 출몰. 기다리지 않고 코어 루프를 확인하는 수단이다.
-            if (Input.GetKeyDown(KeyCode.F2))
+            if (GlobalKey.Down(KeyCode.F2))
             {
                 _eventT = 0f;
 
@@ -63,7 +63,7 @@ namespace Deskmon.Core
             }
 
             // 저장 위치를 여는 것까지 넣어두면 세이브가 실제로 쓰이는지 바로 볼 수 있다.
-            if (Input.GetKeyDown(KeyCode.F3))
+            if (GlobalKey.Down(KeyCode.F3))
             {
                 Application.OpenURL("file://" + Application.persistentDataPath);
                 _lastEvent = "세이브 폴더 열기 (F3)";

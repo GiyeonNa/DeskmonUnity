@@ -66,9 +66,12 @@ namespace Deskmon.Capture
 
             Vector2 cursor = NativeCursor.GetPositionInWindow();
 
-            if (Input.GetMouseButtonDown(0)) OnPress(cursor);
-            else if (Input.GetMouseButton(0)) OnDrag(cursor);
-            else if (Input.GetMouseButtonUp(0)) OnRelease();
+            // GlobalKey를 쓰는 이유: 클릭통과가 켜져 있는 동안 이 창에는 마우스 메시지가
+            // 오지 않아 Input.GetMouseButton이 멈춘다. 그런데 각인은 "야생 근처를 눌러서"
+            // 시작되므로, 통과가 풀리기 직전의 그 클릭을 받으려면 OS에서 직접 읽어야 한다.
+            if (GlobalKey.MouseDown()) OnPress(cursor);
+            else if (GlobalKey.MouseHeld()) OnDrag(cursor);
+            else if (GlobalKey.MouseUp()) OnRelease();
         }
 
         /// <summary>

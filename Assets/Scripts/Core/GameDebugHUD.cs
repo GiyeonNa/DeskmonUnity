@@ -90,6 +90,13 @@ namespace Deskmon.Core
             Row("클릭통과", WindowController.IsClickThrough
                 ? "<color=#8fd6ff>ON</color>" : "<color=#ffd35c>OFF</color>");
 
+            // 숨김 상태는 반드시 보여준다. 카메라가 꺼져 크리처가 전멸하는 상태인데
+            // HUD(IMGUI)는 카메라 없이도 그려지므로, 이 줄이 없으면 "출몰 중인데
+            // 아무것도 없음"으로만 보인다.
+            var overlay = DesktopOverlay.Instance;
+            if (overlay != null && overlay.HiddenByFullscreen)
+                Row("표시", "<color=#ff8f8f>전체화면 감지로 숨김 - 크리처 안 보임</color>");
+
             if (game?.Save != null)
             {
                 Row("베리", Mathf.FloorToInt((float)game.Save.berry).ToString());

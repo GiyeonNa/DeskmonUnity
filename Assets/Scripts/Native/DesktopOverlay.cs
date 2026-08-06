@@ -46,6 +46,9 @@ namespace Deskmon
 
         public bool ClickThrough => WindowController.IsClickThrough;
 
+        /// <summary>전체화면 감지로 숨은 상태인가. 이때 카메라가 꺼져 크리처가 안 보인다.</summary>
+        public bool HiddenByFullscreen => _hiddenByFullscreen;
+
         void Awake()
         {
             Instance = this;
@@ -100,7 +103,10 @@ namespace Deskmon
                 {
                     _hiddenByFullscreen = fs;
                     SetVisible(!fs);
-                    if (logStateChanges) Debug.Log($"[DesktopOverlay] 전체화면 앱 {(fs ? "감지 → 숨김" : "해제 → 복귀")}");
+                    // 이 전환은 logStateChanges와 무관하게 항상 남긴다. 카메라를 통째로
+                    // 끄는 동작이라, 오탐이면 "크리처가 전부 안 보임"이 되는데 로그가
+                    // 없으면 원인을 찾을 수 없다 (실제로 WorkerW 오탐 때 그랬다).
+                    Debug.Log($"[DesktopOverlay] 전체화면 앱 {(fs ? "감지 → 숨김" : "해제 → 복귀")}");
                 }
             }
             if (_hiddenByFullscreen)

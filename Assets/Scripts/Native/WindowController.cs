@@ -101,10 +101,22 @@ namespace Deskmon.Native
         [DllImport("user32.dll")] static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
         [DllImport("user32.dll")] static extern IntPtr GetDesktopWindow();
         [DllImport("user32.dll")] static extern IntPtr GetShellWindow();
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        static extern int GetClassName(IntPtr hWnd, System.Text.StringBuilder lpClassName, int nMaxCount);
+        [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+        static uint _ownPid;
 
         /// <summary>
         /// 현재 포그라운드 창이 화면 전체를 덮고 있는지 (전체화면 게임/발표 감지).
         /// 기획서 §6.1 "전체화면 앱 감지 시 자동 숨김"의 판정부.
+        ///
+        /// 오탐 주의 - 이 판정이 틀리면 카메라가 꺼져서 크리처가 전부 사라진다.
+        /// 실제로 겪은 사례: Windows 11에서 바탕화면 아이콘은 Progman이 아니라
+        /// 별도의 WorkerW 창이 담당한다. GetShellWindow()는 Progman만 돌려주므로
+        /// 바탕화면을 클릭하기만 해도 화면 크기의 WorkerW가 포그라운드가 되어
+        /// "전체화면 앱"으로 오판됐다 - 빌드에서 크리처가 안 보이던 원인.
+        /// 그래서 핸들 비교가 아니라 클래스 이름으로 셸 계열 창을 걸러낸다.
         /// </summary>
         public static bool IsForegroundFullscreen()
         {
@@ -112,8 +124,26 @@ namespace Deskmon.Native
 
             IntPtr fg = GetForegroundWindow();
             if (fg == IntPtr.Zero) return false;
-            // 바탕화면/셸 자체는 전체화면 앱이 아니다
             if (fg == GetDesktopWindow() || fg == GetShellWindow()) return false;
+
+            // 우리 자신은 제외한다. 이 창도 화면 전체 크기라, 혹시라도 포그라운드가
+            // 되는 순간 "전체화면 앱 감지 -> 자기 자신을 숨김"이라는 루프에 빠진다.
+            if (_ownPid == 0)
+                _ownPid = (uint)System.Diagnostics.Process.GetCurrentProcess().Id;
+            GetWindowThreadProcessId(fg, out uint pid);
+            if (pid == _ownPid) return false;
+
+            // 바탕화면 계열 창은 클래스 이름으로 거른다 (핸들 비교로는 못 잡는다)
+            var cls = new System.Text.StringBuilder(64);
+            GetClassName(fg, cls, cls.Capacity);
+            switch (cls.ToString())
+            {
+                case "Progman":        // 바탕화면 (기본)
+                case "WorkerW":        // 바탕화면 (Win10/11에서 아이콘을 실제로 그리는 창)
+                case "Shell_TrayWnd":  // 작업표시줄
+                    return false;
+            }
+
             if (!GetWindowRect(fg, out RECT r)) return false;
 
             int w = r.right - r.left, h = r.bottom - r.top;

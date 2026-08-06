@@ -97,7 +97,8 @@ namespace Deskmon.EditorTools
             // 베이스캠프 카드 UI (S3). 자기 영역을 클릭통과 판정에 등록하므로
             // 카드 위에서만 입력을 받고 나머지는 뒤쪽 창으로 통과된다.
             var uiGO = new GameObject("UI");
-            uiGO.AddComponent<Deskmon.UI.UIRoot>();
+            var uiRoot = uiGO.AddComponent<Deskmon.UI.UIRoot>();
+            uiRoot.theme = AssetDatabase.LoadAssetAtPath<Deskmon.UI.UITheme>("Assets/Data/UITheme.asset");
 
             // 개발용 HUD. 출몰 간격이 2~4분이라 이게 없으면 실행해도 확인할 것이 없다.
             // 배포 전에 show=false로 두거나 컴포넌트를 뺀다.

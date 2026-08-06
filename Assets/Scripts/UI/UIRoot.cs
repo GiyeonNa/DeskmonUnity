@@ -23,6 +23,10 @@ namespace Deskmon.UI
         [Header("배치")]
         public Vector2 margin = new Vector2(12f, 12f);
 
+        [Header("테마")]
+        [Tooltip("UI 이미지 테마. 비면 단색 플레이스홀더로 동작한다. [Deskmon/UI 테마 임포트]가 만든다.")]
+        public UITheme theme;
+
         /// <summary>접힘 상태 - 배지만 보인다.</summary>
         public bool Collapsed { get; private set; } = true;
 
@@ -51,6 +55,9 @@ namespace Deskmon.UI
             _game = GameState.Instance;
             _roam = FindFirstObjectByType<RoamManager>();
 
+            // 조립 전에 넣어야 한다 - UIKit 팩토리들이 조립 시점에 테마를 읽는다.
+            UIKit.Theme = theme;
+
             BuildCanvas();
             BuildBadge();
             BuildCard();
@@ -73,7 +80,8 @@ namespace Deskmon.UI
             {
                 string berry = UIKit.Fmt(_game.Save.berry);
                 if (_badgeBerry != null) _badgeBerry.text = berry;
-                if (_cardBerry != null) _cardBerry.text = "베리 " + berry;
+                if (_cardBerry != null)
+                    _cardBerry.text = (theme != null && theme.iconBerry != null ? "" : "베리 ") + berry;
 
                 if (_cardProd != null)
                 {
@@ -147,9 +155,31 @@ namespace Deskmon.UI
             }
         }
 
-        /// <summary>접힌 상태 - 우하단 작은 배지. 베리 수만 보여준다.</summary>
+        /// <summary>접힌 상태 - 우하단 배지.</summary>
         void BuildBadge()
         {
+            // 테마 배지가 있으면 그 이미지 단독으로 뜬다 - 텐트 토큰 자체가
+            // "여기가 캠프"라는 정보라 베리 수치는 카드를 열면 보이는 것으로 충분하다.
+            if (theme != null && theme.badge != null)
+            {
+                _badge = new GameObject("Badge", typeof(RectTransform), typeof(Image), typeof(Button));
+                _badge.transform.SetParent(_canvas.transform, false);
+
+                var rt = (RectTransform)_badge.transform;
+                rt.anchorMin = rt.anchorMax = rt.pivot = new Vector2(1f, 0f);
+                rt.sizeDelta = new Vector2(40f, 40f);
+                rt.anchoredPosition = new Vector2(-margin.x, margin.y);
+
+                var img = _badge.GetComponent<Image>();
+                img.sprite = theme.badge;
+                img.preserveAspect = true;
+
+                var b = _badge.GetComponent<Button>();
+                b.targetGraphic = img;
+                b.onClick.AddListener(() => SetCollapsed(false));
+                return;
+            }
+
             _badge = UIKit.Panel(_canvas.transform, "Badge", new Vector2(86f, 40f),
                                  new Vector2(1f, 0f), new Vector2(-margin.x, margin.y));
 
@@ -190,9 +220,20 @@ namespace Deskmon.UI
                                         () => SetCollapsed(true));
             UIKit.Fixed(collapse.gameObject, 46f, 20f);
 
-            // 요약
-            _cardBerry = UIKit.Label(list, "베리 0", 14, UIKit.TextGold);
-            UIKit.Fixed(_cardBerry.gameObject, 0f, 18f);
+            // 요약 - 베리는 아이콘이 있으면 아이콘 + 숫자로
+            if (theme != null && theme.iconBerry != null)
+            {
+                var berryRow = UIKit.HRow(list, 18f, 4f);
+                var bIcon = UIKit.SpriteIcon(berryRow, theme.iconBerry, 12f);
+                UIKit.Fixed(bIcon.gameObject, 12f, 12f);
+                _cardBerry = UIKit.Label(berryRow, "0", 14, UIKit.TextGold);
+                UIKit.Fixed(_cardBerry.gameObject, 120f, 18f);
+            }
+            else
+            {
+                _cardBerry = UIKit.Label(list, "베리 0", 14, UIKit.TextGold);
+                UIKit.Fixed(_cardBerry.gameObject, 0f, 18f);
+            }
             _cardProd = UIKit.Label(list, "+0.0/초", 12, UIKit.TextSub);
             UIKit.Fixed(_cardProd.gameObject, 0f, 16f);
             _cardRoam = UIKit.Label(list, "방목 0/2", 12, UIKit.TextSub);

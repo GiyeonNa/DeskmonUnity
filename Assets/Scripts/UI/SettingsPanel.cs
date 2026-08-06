@@ -59,7 +59,7 @@ namespace Deskmon.UI
                     SaveSystem.Save(game.Save);
                     Refresh();
                 });
-                if (current == key) b.GetComponent<Image>().color = UIKit.BtnBgOn;
+                if (current == key) UIKit.SetButtonOn(b, true);
                 UIKit.Fixed(b.gameObject, 64f, 26f);
             }
         }

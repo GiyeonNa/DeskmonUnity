@@ -12,6 +12,13 @@ namespace Deskmon.UI
     /// </summary>
     public static class UIKit
     {
+        /// <summary>
+        /// 적용할 이미지 테마. UIRoot가 시작할 때 넣는다. null이거나 칸이 비면
+        /// 아래 단색 플레이스홀더로 폴백한다 - 이미지가 하나씩 승인되는 파이프라인이라
+        /// 일부만 있어도 화면이 깨지면 안 된다.
+        /// </summary>
+        public static UITheme Theme;
+
         // ── 팔레트 - index.html의 카드 톤(밝은 종이 + 초록 포인트)을 어둡게 뒤집은 것.
         //    바탕화면 위에 뜨는 반투명 카드라 밝은 배경은 아이콘과 뒤섞인다.
         public static readonly Color PanelBg = new Color(0.07f, 0.10f, 0.08f, 0.93f);
@@ -63,7 +70,17 @@ namespace Deskmon.UI
             rt.sizeDelta = size;
             rt.anchoredPosition = pos;
 
-            go.GetComponent<Image>().color = PanelBg;
+            var img = go.GetComponent<Image>();
+            if (Theme != null && Theme.frameCard != null)
+            {
+                // 9슬라이스 프레임. 테두리는 이미지에 있으므로 코드 테두리를 만들지 않는다.
+                img.sprite = Theme.frameCard;
+                img.type = Image.Type.Sliced;
+                img.color = Color.white;
+                return go;
+            }
+
+            img.color = PanelBg;
 
             // 테두리 1px - 이미지가 나오기 전까지 카드 윤곽을 잡아준다
             var line = new GameObject("Line", typeof(RectTransform), typeof(Image), typeof(Outline));
@@ -104,15 +121,39 @@ namespace Deskmon.UI
             go.transform.SetParent(parent, false);
             ((RectTransform)go.transform).sizeDelta = size;
 
-            go.GetComponent<Image>().color = BtnBg;
+            var img = go.GetComponent<Image>();
+            if (Theme != null && Theme.frameButton != null)
+            {
+                img.sprite = Theme.frameButton;
+                img.type = Image.Type.Sliced;
+                img.color = Color.white;
+            }
+            else img.color = BtnBg;
 
             var btn = go.GetComponent<Button>();
-            btn.targetGraphic = go.GetComponent<Image>();
+            btn.targetGraphic = img;
             if (onClick != null) btn.onClick.AddListener(() => onClick());
 
             var label = Label(go.transform, caption, fontSize, TextMain, TextAnchor.MiddleCenter);
             Stretch((RectTransform)label.transform);
             return btn;
+        }
+
+        /// <summary>
+        /// 버튼 활성(선택) 표시. 테마가 있으면 켜짐 프레임으로 스왑하고,
+        /// 없으면 색으로 표현한다. 호출부가 테마 유무를 몰라도 되게 한 지점.
+        /// </summary>
+        public static void SetButtonOn(Button btn, bool on)
+        {
+            var img = btn.GetComponent<Image>();
+            if (img == null) return;
+
+            if (Theme != null && Theme.frameButton != null && Theme.frameButtonOn != null)
+            {
+                img.sprite = on ? Theme.frameButtonOn : Theme.frameButton;
+                img.color = Color.white;
+            }
+            else img.color = on ? BtnBgOn : BtnBg;
         }
 
         /// <summary>부모를 꽉 채운다.</summary>

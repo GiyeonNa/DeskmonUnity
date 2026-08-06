@@ -23,18 +23,23 @@ namespace Deskmon.EditorTools
         {
             if (_scheduled) return;
 
+            bool creature = false, ui = false;
             foreach (var path in imported)
             {
-                if (!path.StartsWith("Assets/Sprites/") || !path.EndsWith(".png")) continue;
-
-                _scheduled = true;
-                EditorApplication.delayCall += () =>
-                {
-                    _scheduled = false;
-                    SpeciesImporter.Import();
-                };
-                return;
+                if (!path.EndsWith(".png")) continue;
+                if (path.StartsWith("Assets/Sprites/UI/")) ui = true;
+                else if (path.StartsWith("Assets/Sprites/")) creature = true;
             }
+            if (!creature && !ui) return;
+
+            _scheduled = true;
+            bool doCreature = creature, doUi = ui;
+            EditorApplication.delayCall += () =>
+            {
+                _scheduled = false;
+                if (doCreature) SpeciesImporter.Import();
+                if (doUi) UIThemeImporter.Import();
+            };
         }
     }
 }

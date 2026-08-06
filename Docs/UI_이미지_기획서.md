@@ -73,18 +73,18 @@ Assets/Sprites/UI/<asset_id>.png
 
 | asset_id | kind | size | border | role | apply_at | silhouette | status |
 |---|---|---|---|---|---|---|---|
-| ui_frame_card | frame | 48x48 | 12 | 카드/패널 배경 | `UIKit.Panel` | 두꺼운 밝은 테두리 창 | todo |
+| ui_frame_card | frame | 48x48 | 12 | 카드/패널 배경 | `UIKit.Panel` | 두꺼운 밝은 테두리 창 | draft |
 | ui_frame_button | frame | 24x24 | 8 | 버튼 평상시 | `UIKit.Button` | 얇은 테두리 알약 사각 | todo |
 | ui_frame_button_on | frame | 24x24 | 8 | 버튼 선택/활성 | `UIKit.Button` | 같은 형태 + 연두 발광 | todo |
 | ui_frame_cell | frame | 16x16 | 5 | 도감 폼 칸 (빈 칸) | `DexPanel.BuildRow` | 안쪽으로 파인 홈 | todo |
-| ui_icon_berry | icon | 12x12 | - | 베리 수치 옆 | `UIRoot` 요약줄 | 열매 1알 + 잎 1장 | todo |
+| ui_icon_berry | icon | 12x12 | - | 베리 수치 옆 | `UIRoot` 요약줄 | 열매 1알 + 잎 1장 | draft |
 | ui_icon_heart | icon | 12x12 | - | 친밀도 표시 | `BagPanel.BuildRow` | 도트 하트 | todo |
 | ui_icon_bag | icon | 16x16 | - | 가방 탭 | `UIRoot.BuildCard` | 끈 묶인 보따리 | todo |
 | ui_icon_dex | icon | 16x16 | - | 도감 탭 | `UIRoot.BuildCard` | 펼친 수첩 | todo |
 | ui_icon_gear | icon | 16x16 | - | 설정 탭 | `UIRoot.BuildCard` | 톱니 1개 | todo |
 | ui_icon_sparkle | icon | 12x12 | - | 샤이니 표시 | `BagPanel`/`DexPanel` | 4각 반짝 별 | todo |
 | ui_icon_sleep | icon | 12x12 | - | 방목 낮잠 상태 | `Roamer` (추후) | z 두 글자 도트 | todo |
-| ui_badge | icon | 40x40 | - | 접힌 배지 | `UIRoot.BuildBadge` | 텐트 또는 모닥불 | todo |
+| ui_badge | icon | 40x40 | - | 접힌 배지 | `UIRoot.BuildBadge` | 텐트 또는 모닥불 | draft |
 | fx_heart | fx | 10x10 | - | 쓰다듬기 하트 | `CaptureEffects.PlayPet` | 하트 (외곽선 포함) | todo |
 | fx_spark | fx | 8x8 | - | 포획 반짝이 | `CaptureEffects` | 4각 별 | todo |
 | fx_ring | fx | 32x32 | - | 포획 링 | `CaptureEffects` | 얇은 원 고리 | todo |

@@ -102,7 +102,7 @@ namespace Deskmon.UI
                     RoamSystem.Toggle(save, db.balance, sp.id, stage, shiny);
                     AfterChange();
                 });
-            if (roaming) roamBtn.GetComponent<Image>().color = UIKit.BtnBgOn;
+            if (roaming) UIKit.SetButtonOn(roamBtn, true);
             UIKit.Fixed(roamBtn.gameObject, 40f, 34f);
 
             // 간식 - 방목 여부와 무관하게 폼에 준다 (원본 가방 패널과 같다)
@@ -126,7 +126,7 @@ namespace Deskmon.UI
                     EvolutionSystem.TryEvolve(save, db, sp.id, stage, shiny, world);
                     AfterChange();
                 });
-                evoBtn.GetComponent<Image>().color = UIKit.BtnBgOn;
+                UIKit.SetButtonOn(evoBtn, true);
                 UIKit.Fixed(evoBtn.gameObject, 40f, 34f);
             }
             else if (reason != EvolutionSystem.BlockReason.FinalStage)

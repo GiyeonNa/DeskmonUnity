@@ -51,11 +51,27 @@ namespace Deskmon.UI
                 bool unlocked = save.FieldUnlocked(SpawnScheduler.FieldId(field.id));
                 var (got, total) = CreatureRegistry.DexProgress(save, db, field.id);
 
+                // 호수는 진영 표시를 함께 - 어느 팀인지가 이 필드의 정체성이다
+                string factionTag = "";
+                if (field.id == Field.Lake && !string.IsNullOrEmpty(save.faction))
+                    factionTag = save.faction == "dew" ? "  이슬 팀" : "  이끼 팀";
+
                 var head = UIKit.Label(_list,
-                    $"{field.displayName}  {got}/{total}" + (unlocked ? "" : "  (잠김)"),
+                    $"{field.displayName}  {got}/{total}{factionTag}" + (unlocked ? "" : "  (잠김)"),
                     13, unlocked ? UIKit.Accent : UIKit.TextSub);
                 head.fontStyle = FontStyle.Bold;
                 UIKit.Fixed(head.gameObject, 0f, 18f);
+
+                // 호수를 해금했는데 진영을 아직 안 골랐으면 여기서 다시 열 수 있다.
+                // (모달을 고르지 않고 지나친 세이브의 유일한 복구 경로다)
+                if (unlocked && field.id == Field.Lake && string.IsNullOrEmpty(save.faction))
+                {
+                    var row = UIKit.HRow(_list, 26f);
+                    UIKit.Fixed(row.gameObject, 0f, 26f);
+                    var pick = UIKit.Button(row, "진영 선택 (필수)", 12, new Vector2(150f, 24f),
+                                            () => _ui.ShowFactionModal());
+                    UIKit.Fixed(pick.gameObject, 150f, 24f);
+                }
 
                 if (!unlocked)
                 {
@@ -135,6 +151,11 @@ namespace Deskmon.UI
             // 해금은 방목 슬롯(+1)과 출몰 풀에 즉시 반영된다
             SaveSystem.Save(game.Save);
             Refresh();
+
+            // 호수는 진영을 골라야 출몰이 시작된다 - 두 종 모두 진영 배타라서
+            // 안 고르면 호수 출몰 풀이 빈다. 해금 직후 바로 묻는다 (원본과 같은 흐름).
+            if (field.id == Field.Lake && string.IsNullOrEmpty(game.Save.faction))
+                _ui.ShowFactionModal();
         }
     }
 }

@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 795cf5897a91cf44e9de3e23fb6bab82, type: 3}
+  m_Name: UITheme
+  m_EditorClassIdentifier: 
+  frameCard: {fileID: 21300000, guid: 1f3d9e2c7b4a48e6a9c01d25f8b7634a, type: 3}
+  frameButton: {fileID: 0}
+  frameButtonOn: {fileID: 0}
+  frameCell: {fileID: 0}
+  iconBerry: {fileID: 21300000, guid: d9a0e3b5c624418bb72f63e8a4510f2d, type: 3}
+  iconHeart: {fileID: 0}
+  iconBag: {fileID: 0}
+  iconDex: {fileID: 0}
+  iconGear: {fileID: 0}
+  iconSparkle: {fileID: 0}
+  iconSleep: {fileID: 0}
+  badge: {fileID: 21300000, guid: a7d625b4390c4f0c9f2e74b81a6d3c5e, type: 3}
+  fxHeart: {fileID: 0}
+  fxSpark: {fileID: 0}
+  fxRing: {fileID: 0}

@@ -42,6 +42,7 @@ namespace Deskmon.UI
         BagPanel _bag;
         DexPanel _dex;
         SettingsPanel _settings;
+        FactionModal _faction;
 
         Rect _screenRect;
         Rect _sigilBlocked;
@@ -106,6 +107,10 @@ namespace Deskmon.UI
             Rect r = RectOf(Collapsed ? _badge : _card);
             if (!Collapsed && _openPanel != null && _openPanel.activeSelf)
                 r = Union(r, RectOf(_openPanel));
+
+            // 진영 모달은 화면 중앙에 뜬다 - 이 영역도 입력을 받아야 버튼이 눌린다
+            if (_faction != null && _faction.Root.activeSelf)
+                r = Union(r, RectOf(_faction.Root));
 
             _screenRect = r;
 
@@ -294,6 +299,15 @@ namespace Deskmon.UI
             if (_openPanel != null) _openPanel.SetActive(false);
             _openPanel = null;
             _openPanelName = null;
+        }
+
+        /// <summary>진영 선택 모달을 연다. 호수 해금 시, 또는 도감의 [진영 선택]에서.</summary>
+        public void ShowFactionModal()
+        {
+            if (_game?.Save == null || !string.IsNullOrEmpty(_game.Save.faction)) return;
+
+            if (_faction == null) _faction = new FactionModal(_canvas.transform, this);
+            _faction.Root.SetActive(true);
         }
 
         /// <summary>열린 패널을 다시 그린다. 포획/진화/해금 뒤에 부른다.</summary>

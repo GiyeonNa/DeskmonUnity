@@ -44,7 +44,7 @@ MonoBehaviour:
   newbieWindow: 600
   stayDuration: {x: 40, y: 60}
   scoutDelay: 10
-  sigilTolerance: 0.66
+  sigilTolerance: 0.296
   sigilEasy:
   - circle
   - triangle

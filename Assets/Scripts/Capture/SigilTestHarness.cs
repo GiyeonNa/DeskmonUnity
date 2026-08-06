@@ -34,11 +34,20 @@ namespace Deskmon.Capture
 
         const int PANEL_X = 12, PANEL_Y = 12, PANEL_W = 350, PANEL_H = 256;
 
-        /// <summary>인식기가 아는 문양 전부. 전수 모드에서 쓴다.</summary>
-        static readonly string[] AllGlyphs =
+        /// <summary>
+        /// 인식기가 아는 문양 전부. 전수 모드에서 쓴다.
+        ///
+        /// 목록을 여기 적어두지 않고 인식기에서 가져온다 - 문양을 추가했을 때
+        /// 하네스만 옛 목록을 들고 있으면 새 문양을 확인할 방법이 없어진다.
+        /// </summary>
+        static string[] AllGlyphs
         {
-            "circle", "triangle", "square", "caret", "wave", "star", "zigzag", "spiral",
-        };
+            get
+            {
+                var list = new List<string>(SigilRecognizer.Names);
+                return list.ToArray();
+            }
+        }
 
         void Start()
         {

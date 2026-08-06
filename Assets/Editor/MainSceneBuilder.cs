@@ -91,6 +91,12 @@ namespace Deskmon.EditorTools
             state.db = db;
             state.scheduler = scheduler;
 
+            // 개발용 HUD. 출몰 간격이 2~4분이라 이게 없으면 실행해도 확인할 것이 없다.
+            // 배포 전에 show=false로 두거나 컴포넌트를 뺀다.
+            var hud = gameGO.AddComponent<GameDebugHUD>();
+            hud.game = state;
+            hud.scheduler = scheduler;
+
             EditorSceneManager.SaveScene(scene, SCENE_PATH);
 
             // 빌드에는 본 게임 씬만 넣는다. 스파이크/테스트 씬은 개발용 도구다.

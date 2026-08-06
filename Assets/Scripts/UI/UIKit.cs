@@ -124,7 +124,13 @@ namespace Deskmon.UI
             rt.offsetMax = Vector2.zero;
         }
 
-        /// <summary>가로줄 컨테이너 - 자식을 왼쪽부터 나란히.</summary>
+        /// <summary>
+        /// 가로줄 컨테이너 - 자식을 왼쪽부터 나란히.
+        ///
+        /// childControl은 반드시 켠다. 꺼두면 레이아웃 그룹이 LayoutElement의
+        /// 크기 지정(Fixed)을 무시하고 RectTransform 기본값(100x100)을 그대로 쓴다 -
+        /// 실제로 배지의 10px 점이 100px 녹색 사각형으로 화면을 덮었다.
+        /// </summary>
         public static RectTransform HRow(Transform parent, float height, float spacing = 6f)
         {
             var go = new GameObject("Row", typeof(RectTransform), typeof(HorizontalLayoutGroup));
@@ -133,10 +139,15 @@ namespace Deskmon.UI
             var lg = go.GetComponent<HorizontalLayoutGroup>();
             lg.spacing = spacing;
             lg.childAlignment = TextAnchor.MiddleLeft;
-            lg.childControlWidth = false;
-            lg.childControlHeight = false;
+            lg.childControlWidth = true;
+            lg.childControlHeight = true;
             lg.childForceExpandWidth = false;
             lg.childForceExpandHeight = false;
+
+            // 줄 자신도 부모 목록의 제어를 받으므로 높이를 LayoutElement로 준다
+            var le = go.AddComponent<LayoutElement>();
+            le.minHeight = height;
+            le.preferredHeight = height;
 
             var rt = (RectTransform)go.transform;
             rt.sizeDelta = new Vector2(0f, height);
@@ -155,7 +166,7 @@ namespace Deskmon.UI
             lg.padding = padding ?? new RectOffset(10, 10, 8, 8);
             lg.childAlignment = TextAnchor.UpperLeft;
             lg.childControlWidth = true;
-            lg.childControlHeight = false;
+            lg.childControlHeight = true;   // HRow와 같은 이유 - Fixed가 동작하려면 켜야 한다
             lg.childForceExpandWidth = true;
             lg.childForceExpandHeight = false;
 

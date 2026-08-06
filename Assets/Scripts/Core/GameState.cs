@@ -141,14 +141,20 @@ namespace Deskmon.Core
             // 바탕화면 위에서는 너무 작아 보이지 않는 수준이라 확대한다 (스파이크 씬과 같은 값).
             _wild.transform.localScale = Vector3.one * creatureScale;
 
+            // 컴포넌트 확보는 전부 EnsureComponent(TryGetComponent 기반)를 쓴다.
+            // `GetComponent<T>() ?? AddComponent<T>()`는 함정이다 - Unity는 없는 컴포넌트에
+            // 가짜 null(네이티브가 죽은 래퍼)을 돌려줄 수 있는데, ??는 Unity가 오버로드한
+            // ==가 아니라 순수 참조 비교라 가짜 null이 그대로 통과한다. AddComponent가
+            // 실행되지 않고, 다음 접근에서 MissingComponentException이 터지며 출몰 구성이
+            // 통째로 중단됐다 ("출몰 중인데 화면에 없음"의 원인).
+
             // 외형
             // SpriteRenderer를 먼저 붙인다. CreatureAppearance는 Awake에서 이걸 찾는데,
             // RequireComponent에 맡기면 부착 순서에 따라 다른 컴포넌트 뒤로 밀릴 수 있다.
-            var sr = _wild.GetComponent<SpriteRenderer>() ?? _wild.AddComponent<SpriteRenderer>();
+            var sr = EnsureComponent<SpriteRenderer>(_wild);
             sr.sortingOrder = 10;
 
-            var appearance = _wild.GetComponent<CreatureAppearance>()
-                             ?? _wild.AddComponent<CreatureAppearance>();
+            var appearance = EnsureComponent<Creatures.CreatureAppearance>(_wild);
             appearance.Set(species, 0, shiny);
 
             if (sr.sprite == null)
@@ -156,27 +162,27 @@ namespace Deskmon.Core
                                "[Deskmon/데이터 임포트]로 formSprites를 채우세요. 화면에 아무것도 보이지 않습니다.");
 
             // 접근 패턴
-            var behavior = _wild.GetComponent<WildBehavior>() ?? _wild.AddComponent<WildBehavior>();
+            var behavior = EnsureComponent<Capture.WildBehavior>(_wild);
             behavior.species = species;
             behavior.stayTime = StayTimeFor(species);
 
             // 각인
-            _capture = _wild.GetComponent<SigilCapture>() ?? _wild.AddComponent<SigilCapture>();
+            _capture = EnsureComponent<Capture.SigilCapture>(_wild);
             _capture.db = db;
             _capture.Begin(species);
             behavior.capture = _capture;
 
-            var input = _wild.GetComponent<SigilInput>() ?? _wild.AddComponent<SigilInput>();
+            var input = EnsureComponent<Capture.SigilInput>(_wild);
             input.wildTarget = _wild.transform;
 
-            var ui = _wild.GetComponent<SigilUI>() ?? _wild.AddComponent<SigilUI>();
+            var ui = EnsureComponent<Capture.SigilUI>(_wild);
             ui.wildTarget = _wild.transform;
 
             // 연출은 야생과 다른 오브젝트에 둔다. 개체가 사라진 뒤에도 반짝임과
             // 궤적이 남아 있어야 하는데, 같은 오브젝트에 붙이면 함께 파괴된다.
             var effects = EnsureEffects();
 
-            var caughtAnim = _wild.GetComponent<CaughtAnimation>() ?? _wild.AddComponent<CaughtAnimation>();
+            var caughtAnim = EnsureComponent<Capture.CaughtAnimation>(_wild);
             caughtAnim.effects = effects;
             caughtAnim.enabled = false;   // 포획 전까지는 돌지 않는다
 
@@ -230,6 +236,15 @@ namespace Deskmon.Core
         {
             var cam = Camera.main;
             return cam != null ? (Vector2)cam.WorldToScreenPoint(t.position) : Vector2.zero;
+        }
+
+        /// <summary>
+        /// 있으면 얻고 없으면 붙인다. TryGetComponent는 가짜 null을 만들지 않고
+        /// 진짜 존재 여부를 bool로 알려주므로 이 용도로 안전한 유일한 API다.
+        /// </summary>
+        static T EnsureComponent<T>(GameObject go) where T : Component
+        {
+            return go.TryGetComponent<T>(out var c) ? c : go.AddComponent<T>();
         }
 
         /// <summary>연출 전용 오브젝트. 야생보다 오래 살아야 하므로 따로 두고 재사용한다.</summary>

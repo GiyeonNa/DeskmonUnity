@@ -56,7 +56,8 @@ namespace Deskmon.Capture
             if (capture == null) capture = GetComponent<SigilCapture>();
 
             // 포획 연출도 여기서 확인한다 - 실제 출몰 없이는 볼 방법이 없다.
-            _effects = GetComponent<CaptureEffects>() ?? gameObject.AddComponent<CaptureEffects>();
+            // ??는 Unity 가짜 null을 통과시키므로 TryGetComponent로 확인한다.
+            if (!TryGetComponent(out _effects)) _effects = gameObject.AddComponent<CaptureEffects>();
 
             Restart();
 

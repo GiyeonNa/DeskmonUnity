@@ -97,6 +97,17 @@ namespace Deskmon.Capture
         public void PlayGlyphSuccess(Vector2 screenPos)
             => _rings.Add(new Ring { pos = screenPos, t = 0f, max = 46f });
 
+        /// <summary>쓰다듬기 - 하트 3개가 시차를 두고 떠오른다. overlay.html:311</summary>
+        public void PlayPet(Vector2 screenPos)
+        {
+            for (int i = 0; i < 3; i++)
+                _hearts.Add(new Heart
+                {
+                    pos = screenPos + new Vector2(Random.Range(-12f, 12f), 28f),
+                    t = -i * 0.1f,
+                });
+        }
+
         /// <summary>포획된 개체가 날아가는 동안의 궤적.</summary>
         public void AddTrail(Vector2 screenPos)
             => _trails.Add(new Trail

@@ -34,6 +34,17 @@ namespace Deskmon.Creatures
 
         public State state = State.Idle;
 
+        /// <summary>
+        /// 잠깐 멈춘다 - 쓰다듬기 반응용 (overlay.html: r.pauseT=1).
+        /// 자던 개체는 깨운다. 만지면 일어나는 것이 자연스럽다.
+        /// </summary>
+        public void Pause(float seconds)
+        {
+            state = State.Idle;
+            _sleepT = 0f;
+            _pauseT = Mathf.Max(_pauseT, seconds);
+        }
+
         SpriteRenderer _sr;
         Camera _cam;
         Vector2 _target;

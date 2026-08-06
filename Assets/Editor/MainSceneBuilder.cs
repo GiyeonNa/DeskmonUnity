@@ -91,6 +91,9 @@ namespace Deskmon.EditorTools
             state.db = db;
             state.scheduler = scheduler;
 
+            // 방목 - 세이브의 roam 목록을 씬으로 투영한다 (S3)
+            gameGO.AddComponent<RoamManager>();
+
             // 개발용 HUD. 출몰 간격이 2~4분이라 이게 없으면 실행해도 확인할 것이 없다.
             // 배포 전에 show=false로 두거나 컴포넌트를 뺀다.
             var hud = gameGO.AddComponent<GameDebugHUD>();

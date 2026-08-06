@@ -68,7 +68,8 @@ namespace Deskmon.Core
         [Tooltip("기본 방목 슬롯 — 필드 해금당 +1. 최대 슬롯은 기획서 v4 §11 열린 결정 3.")]
         public int roamBaseSlots = 2;
         public float petCooldown = 30f;
-        public Vector2 petFriendGain = new Vector2(2f, 5f);
+        [Tooltip("쓰다듬기로 얻는 베리 범위 - data.js PET.min/max. 친밀도는 friendPerPet이다.")]
+        public Vector2 petBerryGain = new Vector2(2f, 5f);
         public int snackCost = 3;
         public float playCooldown = 18f;
         public int playFriendGain = 3;

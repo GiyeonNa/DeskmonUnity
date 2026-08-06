@@ -18,6 +18,7 @@ namespace Deskmon.Core
 
         public GameState game;
         public SpawnScheduler scheduler;
+        public RoamManager roam;
 
         GUIStyle _style, _box;
         string _lastEvent = "-";
@@ -27,6 +28,7 @@ namespace Deskmon.Core
         {
             if (game == null) game = FindFirstObjectByType<GameState>();
             if (scheduler == null) scheduler = FindFirstObjectByType<SpawnScheduler>();
+            if (roam == null) roam = FindFirstObjectByType<RoamManager>();
 
             if (game != null)
                 game.OnCaught += r =>
@@ -69,6 +71,106 @@ namespace Deskmon.Core
                 _lastEvent = "세이브 폴더 열기 (F3)";
                 _eventT = 0f;
             }
+
+            // ── S3 검증 키 - 가방 UI가 나오기 전까지의 임시 조작 수단 ──
+
+            // F4: 첫 보유 폼 방목 토글
+            if (GlobalKey.Down(KeyCode.F4)) { _eventT = 0f; _lastEvent = ToggleFirstRoam(); }
+
+            // F5: 첫 방목 개체에게 간식 (베리 3 소모, 친밀 +6, 만복 기록)
+            if (GlobalKey.Down(KeyCode.F5)) { _eventT = 0f; _lastEvent = SnackFirstRoamer(); }
+
+            // F6: 일괄 진화
+            if (GlobalKey.Down(KeyCode.F6)) { _eventT = 0f; _lastEvent = EvolveAll(); }
+        }
+
+        string ToggleFirstRoam()
+        {
+            if (game?.Save == null || game.db == null) return "방목 실패: 세이브 없음";
+
+            // 보유한 첫 폼을 찾는다 - 이미 방목 중이면 회수가 되니 토글 확인에도 쓴다
+            foreach (var sp in game.db.species)
+            {
+                if (sp == null) continue;
+                var c = game.Save.Creature(sp.id);
+                for (int st = 0; st < sp.forms; st++)
+                {
+                    for (int track = 0; track < 2; track++)
+                    {
+                        bool shiny = track == 1;
+                        if ((shiny ? c.shiny[st] : c.s[st]) < 1) continue;
+
+                        var r = RoamSystem.Toggle(game.Save, game.db.balance, sp.id, st, shiny);
+                        SaveSystem.Save(game.Save);
+                        if (roam != null) roam.Refresh();
+
+                        switch (r)
+                        {
+                            case RoamSystem.ToggleResult.Added:   return $"방목: {sp.NameAt(st)}";
+                            case RoamSystem.ToggleResult.Removed: return $"회수: {sp.NameAt(st)}";
+                            case RoamSystem.ToggleResult.Full:    return "방목 슬롯 가득";
+                            default:                              return "방목 실패";
+                        }
+                    }
+                }
+            }
+            return "방목 실패: 보유 개체 없음 (먼저 잡으세요)";
+        }
+
+        string SnackFirstRoamer()
+        {
+            if (game?.Save == null || game.db?.balance == null) return "간식 실패: 세이브 없음";
+
+            var target = roam != null ? roam.First : null;
+            if (target == null) return "간식 실패: 방목 개체 없음 (F4)";
+
+            var r = FriendshipSystem.Snack(game.Save, game.db.balance, target.speciesId, target.stage);
+            if (r.notEnoughBerry) return $"간식 실패: 베리 부족 (필요 {game.db.balance.snackCost})";
+            if (!r.ok) return "간식 실패";
+
+            SaveSystem.Save(game.Save);
+            return $"간식 - 친밀 Lv{r.newLevel}" + (r.leveledUp ? " (레벨 업)" : "");
+        }
+
+        string EvolveAll()
+        {
+            if (game?.Save == null || game.db == null) return "진화 실패: 세이브 없음";
+
+            var w = WorldConditions.Now(IdleTime.IsWorking(game.db.balance.workingIdleSec));
+            int n = EvolutionSystem.EvolveAll(game.Save, game.db, w);
+
+            if (n > 0)
+            {
+                SaveSystem.Save(game.Save);
+                if (roam != null) roam.Refresh();   // 진화로 방목 폼이 사라졌을 수 있다
+                return $"진화 {n}회";
+            }
+
+            // 왜 안 되는지 첫 이유를 보여준다 - "안 됨"만으로는 친밀도 부족인지 알 수 없다
+            foreach (var sp in game.db.species)
+            {
+                if (sp == null) continue;
+                for (int st = 0; st < sp.forms - 1; st++)
+                {
+                    var reason = EvolutionSystem.Check(game.Save, game.db, sp.id, st, false, w);
+                    if (reason != EvolutionSystem.BlockReason.NoCreature
+                        && reason != EvolutionSystem.BlockReason.FinalStage)
+                        return $"진화 불가: {sp.NameAt(st)} - {ReasonText(reason, st)}";
+                }
+            }
+            return "진화 대상 없음";
+        }
+
+        string ReasonText(EvolutionSystem.BlockReason r, int stage)
+        {
+            switch (r)
+            {
+                case EvolutionSystem.BlockReason.Friendship:
+                    return $"친밀 Lv{game.db.balance.EvolveLevelFor(stage)} 필요 (쓰다듬기/간식)";
+                case EvolutionSystem.BlockReason.NeedNight: return "밤(18~06시)에만 진화";
+                case EvolutionSystem.BlockReason.NeedFed:   return "간식을 먹여야 진화 (F5)";
+                default: return r.ToString();
+            }
         }
 
         void OnGUI()
@@ -76,7 +178,7 @@ namespace Deskmon.Core
             if (!show) return;
             EnsureStyles();
 
-            const int W = 330, H = 210;
+            const int W = 330, H = 252;
             GUI.Box(new Rect(12, 12, W, H), GUIContent.none, _box);
             GUILayout.BeginArea(new Rect(24, 22, W - 24, H - 20));
 
@@ -113,13 +215,27 @@ namespace Deskmon.Core
 
             Row("유휴", $"{IdleTime.Seconds():F0}s ({(IdleTime.IsWorking() ? "작업중" : "휴식")})");
 
+            // 방목 + 첫 개체의 친밀도. 친밀도가 진화 엔진이라 진행이 보여야 한다.
+            if (game?.Save != null && game.db?.balance != null)
+            {
+                string roamText = $"{(roam != null ? roam.Count : 0)} / {RoamSystem.Slots(game.Save, game.db.balance)}";
+                var first = roam != null ? roam.First : null;
+                if (first != null)
+                {
+                    int lv = FriendshipSystem.Level(game.Save, game.db.balance, first.speciesId, first.stage);
+                    int pts = FriendshipSystem.Points(game.Save, first.speciesId, first.stage);
+                    roamText += $"   친밀 Lv{lv} ({pts}pt)";
+                }
+                Row("방목", roamText);
+            }
+
             // 최근 이벤트는 잠깐만 강조한다 - 계속 떠 있으면 지금 일어난 일인지 알 수 없다.
             if (_eventT < 6f)
                 Row("최근", $"<color=#ffe9a3>{_lastEvent}</color>");
 
             GUILayout.Space(4);
-            GUILayout.Label("<size=11>F1 HUD · <b>F2 즉시 출몰</b> · F3 세이브 폴더\n" +
-                            "<b>종료: Ctrl+Alt+Q</b> (전역)</size>", _style);
+            GUILayout.Label("<size=11>F1 HUD · <b>F2 출몰</b> · F3 세이브 · <b>F4 방목</b> · F5 간식 · F6 진화\n" +
+                            "방목 개체 클릭 = 쓰다듬기 · <b>종료: Ctrl+Alt+Q</b> (전역)</size>", _style);
 
             GUILayout.EndArea();
         }

@@ -74,9 +74,33 @@ namespace Deskmon.Native
         // Input.GetMouseButton도 멈춘다. 키와 같은 이유로 직접 읽는다.
 
         const int VK_LBUTTON = 0x01;
+        const int VK_RBUTTON = 0x02;
 
         static bool _mouseNow, _mouseWas;
         static int _mouseFrame = -1;
+
+#if !UNITY_EDITOR
+        // 폴링은 빌드에서만 쓴다 - 에디터 분기는 Unity 입력을 그대로 쓰므로
+        // 선언 자체를 빼야 "쓰지 않는 필드" 경고가 나지 않는다.
+        static bool _rNow, _rWas;
+        static int _rFrame = -1;
+#endif
+
+        /// <summary>이번 프레임에 우클릭이 눌렸는가. 공놀이 던지기 등 보조 조작용.</summary>
+        public static bool MouseRightDown()
+        {
+#if UNITY_EDITOR
+            return Input.GetMouseButtonDown(1);
+#else
+            if (_rFrame != Time.frameCount)
+            {
+                _rFrame = Time.frameCount;
+                _rWas = _rNow;
+                _rNow = (GetAsyncKeyState(VK_RBUTTON) & 0x8000) != 0;
+            }
+            return _rNow && !_rWas;
+#endif
+        }
 
         /// <summary>
         /// 프레임당 한 번만 실제 상태를 읽는다.

@@ -13,17 +13,17 @@ MonoBehaviour:
   m_Name: UITheme
   m_EditorClassIdentifier: 
   frameCard: {fileID: 21300000, guid: 1f3d9e2c7b4a48e6a9c01d25f8b7634a, type: 3}
-  frameButton: {fileID: 0}
-  frameButtonOn: {fileID: 0}
-  frameCell: {fileID: 0}
+  frameButton: {fileID: 21300000, guid: 5a59c7b5cae247888c7391ef4ae98166, type: 3}
+  frameButtonOn: {fileID: 21300000, guid: f70fece7b6d54ac6a1ef2df951ae160e, type: 3}
+  frameCell: {fileID: 21300000, guid: 08dd854e8253417fbbfa034f846e7bb5, type: 3}
   iconBerry: {fileID: 21300000, guid: d9a0e3b5c624418bb72f63e8a4510f2d, type: 3}
-  iconHeart: {fileID: 0}
-  iconBag: {fileID: 0}
-  iconDex: {fileID: 0}
-  iconGear: {fileID: 0}
-  iconSparkle: {fileID: 0}
-  iconSleep: {fileID: 0}
+  iconHeart: {fileID: 21300000, guid: e8006db73db84399b6073b3298868d37, type: 3}
+  iconBag: {fileID: 21300000, guid: 39838567fbda465eb137b96c34321b3c, type: 3}
+  iconDex: {fileID: 21300000, guid: d59e0157a39c40d39473e4aae939fa91, type: 3}
+  iconGear: {fileID: 21300000, guid: 7360c5c3c3a94412967f2db92761cc3f, type: 3}
+  iconSparkle: {fileID: 21300000, guid: 450717f631844891a80a90dd62a50be8, type: 3}
+  iconSleep: {fileID: 21300000, guid: a431660ee5e24ef9964e5a9db25e42d4, type: 3}
   badge: {fileID: 21300000, guid: a7d625b4390c4f0c9f2e74b81a6d3c5e, type: 3}
-  fxHeart: {fileID: 0}
-  fxSpark: {fileID: 0}
-  fxRing: {fileID: 0}
+  fxHeart: {fileID: 21300000, guid: 02aca976b1474172b4c01192e25f0d87, type: 3}
+  fxSpark: {fileID: 21300000, guid: be6fce69393345faa26e82399402056a, type: 3}
+  fxRing: {fileID: 21300000, guid: 5ad1f0ba7bd744b1955d6a015be3feae, type: 3}

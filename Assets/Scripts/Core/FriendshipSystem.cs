@@ -74,6 +74,19 @@ namespace Deskmon.Core
             return r;
         }
 
+        /// <summary>
+        /// 공놀이 완료 보상. index.html ipc.on('play-roam') - 무료 친밀도(+3).
+        /// 베리를 안 쓰는 유일한 친밀도 수단이라 쿨다운(PLAY.cd)이 밸런스의 전부다 -
+        /// 쿨다운은 개체 런타임 상태로 Roamer가 관리한다.
+        /// </summary>
+        public static bool Play(SaveData save, BalanceData balance,
+                                string speciesId, int stage, out int newLevel)
+        {
+            newLevel = 0;
+            if (save == null || balance == null) return false;
+            return AddPoints(save, balance, speciesId, stage, balance.playFriendGain, out newLevel);
+        }
+
         /// <summary>포인트 적립. 레벨이 올랐으면 true.</summary>
         static bool AddPoints(SaveData save, BalanceData balance,
                               string speciesId, int stage, int points, out int newLevel)

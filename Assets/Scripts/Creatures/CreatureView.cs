@@ -35,6 +35,16 @@ namespace Deskmon.Creatures
         public State state = State.Idle;
 
         /// <summary>
+        /// 외부(공놀이 추격 등)가 이동을 대신하는 동안 산책 AI를 멈춘다.
+        /// 모션(스쿼시·플립)은 계속 돈다 - 외부는 위치만 옮기고 살아있는 느낌은 여기 남는다.
+        /// state를 Walk로 두면 걷기 스쿼시가, Idle이면 호흡만 나온다.
+        /// </summary>
+        public bool ExternallyDriven { get; set; }
+
+        /// <summary>바라보는 방향을 외부에서 지정한다 (좌우 플립).</summary>
+        public void FaceDir(int dir) => _dir = dir >= 0 ? 1 : -1;
+
+        /// <summary>
         /// 잠깐 멈춘다 - 쓰다듬기 반응용 (overlay.html: r.pauseT=1).
         /// 자던 개체는 깨운다. 만지면 일어나는 것이 자연스럽다.
         /// </summary>
@@ -94,6 +104,9 @@ namespace Deskmon.Creatures
         /// <summary>overlay.html:105-120 상태 전이.</summary>
         void Tick(float dt)
         {
+            // 외부가 몰고 있는 동안 산책 AI는 손을 뗀다 (위치를 서로 덮어쓰면 떨린다)
+            if (ExternallyDriven) return;
+
             if (state == State.Sleep)
             {
                 _sleepT -= dt;
@@ -151,7 +164,7 @@ namespace Deskmon.Creatures
                 _baseScale.y * sy,
                 _baseScale.z);
 
-            if (hop && state == State.Walk)
+            if (hop && state == State.Walk && !ExternallyDriven)   // 추격 중엔 외부가 y를 몬다
             {
                 float bounce = Mathf.Abs(Mathf.Sin(_t * 8f)) * PixelsToUnits(hopHeight);
                 var p = transform.position;

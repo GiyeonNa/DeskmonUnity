@@ -251,7 +251,7 @@ namespace Deskmon.Core
 
             GUILayout.Space(4);
             GUILayout.Label("<size=11>F1 HUD · <b>F2 출몰</b> · F3 세이브 · <b>F4 방목</b> · F5 간식 · F6 진화\n" +
-                            "방목 개체 클릭 = 쓰다듬기 · <b>종료: Ctrl+Alt+Q</b> (전역)</size>", _style);
+                            "방목 클릭=쓰다듬기 · 우클릭=공놀이 · <b>종료: Ctrl+Alt+Q</b> (전역)</size>", _style);
 
             GUILayout.EndVertical();
 

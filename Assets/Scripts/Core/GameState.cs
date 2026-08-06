@@ -25,6 +25,9 @@ namespace Deskmon.Core
         [Tooltip("야생 개체를 만들 때 쓰는 프리팹. 비면 런타임에 최소 구성으로 만든다.")]
         public GameObject wildPrefab;
 
+        [Tooltip("크리처 확대 배율. 48px 스프라이트는 등배로 두면 화면에서 48픽셀이라 너무 작다.")]
+        public float creatureScale = 2f;
+
         [Header("저장")]
         [Tooltip("이 간격(초)마다 자동 저장. 0이면 끔.")]
         public float autosaveInterval = 30f;
@@ -134,10 +137,23 @@ namespace Deskmon.Core
             _wild.name = $"Wild_{species.id}";
             PlaceRandomly(_wild.transform);
 
+            // 크기: 48px 스프라이트를 PPU 100으로 그대로 두면 화면에서 48픽셀이다.
+            // 바탕화면 위에서는 너무 작아 보이지 않는 수준이라 확대한다 (스파이크 씬과 같은 값).
+            _wild.transform.localScale = Vector3.one * creatureScale;
+
             // 외형
+            // SpriteRenderer를 먼저 붙인다. CreatureAppearance는 Awake에서 이걸 찾는데,
+            // RequireComponent에 맡기면 부착 순서에 따라 다른 컴포넌트 뒤로 밀릴 수 있다.
+            var sr = _wild.GetComponent<SpriteRenderer>() ?? _wild.AddComponent<SpriteRenderer>();
+            sr.sortingOrder = 10;
+
             var appearance = _wild.GetComponent<CreatureAppearance>()
                              ?? _wild.AddComponent<CreatureAppearance>();
             appearance.Set(species, 0, shiny);
+
+            if (sr.sprite == null)
+                Debug.LogError($"[GameState] {species.id}의 스프라이트가 없습니다 - " +
+                               "[Deskmon/데이터 임포트]로 formSprites를 채우세요. 화면에 아무것도 보이지 않습니다.");
 
             // 접근 패턴
             var behavior = _wild.GetComponent<WildBehavior>() ?? _wild.AddComponent<WildBehavior>();

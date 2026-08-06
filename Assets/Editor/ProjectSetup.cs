@@ -79,8 +79,39 @@ namespace Deskmon.EditorTools
             // 상주 앱이므로 프레임을 묶어 전력을 아낀다 (overlay.html의 상시 rAF 문제 회피)
             QualitySettings.vSyncCount = 1;
 
+            EnsureIncludedShaders();
+
             AssetDatabase.SaveAssets();
             if (verbose) Debug.Log("[Deskmon] 프로젝트 설정 적용 완료.");
+        }
+
+        /// <summary>
+        /// 코드에서만 Shader.Find로 찾는 셰이더를 빌드에 강제로 포함시킨다.
+        ///
+        /// 왜 필요한가: 어떤 씬이나 머티리얼 에셋도 참조하지 않는 셰이더는 빌드에서
+        /// 통째로 빠진다. 그러면 에디터에서는 멀쩡하다가 빌드에서만 Shader.Find가
+        /// null을 돌려주고, 샤이니와 아웃라인이 조용히 사라진다.
+        /// </summary>
+        static void EnsureIncludedShaders()
+        {
+            var shader = AssetDatabase.LoadAssetAtPath<Shader>("Assets/Shaders/PaletteSwap.shader");
+            if (shader == null) return;
+
+            var graphics = AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/GraphicsSettings.asset");
+            if (graphics == null || graphics.Length == 0) return;
+
+            var so = new SerializedObject(graphics[0]);
+            var list = so.FindProperty("m_AlwaysIncludedShaders");
+            if (list == null) return;
+
+            for (int i = 0; i < list.arraySize; i++)
+                if (list.GetArrayElementAtIndex(i).objectReferenceValue == shader) return;
+
+            list.InsertArrayElementAtIndex(list.arraySize);
+            list.GetArrayElementAtIndex(list.arraySize - 1).objectReferenceValue = shader;
+            so.ApplyModifiedProperties();
+
+            Debug.Log("[Deskmon] PaletteSwap 셰이더를 빌드 포함 목록에 추가했습니다.");
         }
     }
 }

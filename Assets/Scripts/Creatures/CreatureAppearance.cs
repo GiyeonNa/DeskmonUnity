@@ -34,9 +34,44 @@ namespace Deskmon.Creatures
         SpriteRenderer _sr;
         MaterialPropertyBlock _mpb;
 
+        /// <summary>
+        /// 팔레트 스왑 머티리얼. 전 크리처가 하나를 공유한다.
+        ///
+        /// 인스턴스별 색은 MaterialPropertyBlock으로 덮어쓰므로 머티리얼을 복제할 필요가 없다.
+        /// 복제하면 배칭이 깨지고 누수도 생긴다.
+        /// </summary>
+        static Material _shared;
+
+        static Material Shared
+        {
+            get
+            {
+                if (_shared != null) return _shared;
+
+                var shader = Shader.Find("Deskmon/PaletteSwap");
+                if (shader == null)
+                {
+                    // 셰이더가 빌드에 포함되지 않으면 여기서 걸린다. 스프라이트는 보이되
+                    // 샤이니와 아웃라인만 안 먹는 상태가 되므로 조용히 넘어가면 원인을 못 찾는다.
+                    Debug.LogError("[CreatureAppearance] Deskmon/PaletteSwap 셰이더를 찾지 못했습니다. " +
+                                   "기본 스프라이트 머티리얼로 대체합니다 (샤이니/아웃라인 비활성).");
+                    return null;
+                }
+
+                _shared = new Material(shader) { name = "PaletteSwap (shared)" };
+                return _shared;
+            }
+        }
+
         void Awake()
         {
             _sr = GetComponent<SpriteRenderer>();
+
+            // 셰이더를 붙이지 않으면 _BaseColor/_Swap 같은 프로퍼티가 갈 곳이 없어
+            // 팔레트 스왑과 아웃라인이 통째로 무시된다.
+            var mat = Shared;
+            if (mat != null) _sr.sharedMaterial = mat;
+
             Apply();
         }
 

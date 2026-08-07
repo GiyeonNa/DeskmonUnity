@@ -42,7 +42,12 @@ namespace Deskmon.Capture
         public float arriveDist = 12f;
 
         [Header("체류")]
-        [Tooltip("남은 체류 시간. 0이 되면 떠난다 - 야생이 사라지는 유일한 이유다.")]
+        [Tooltip("true면 잡히기 전까지 떠나지 않는다. 원본의 체류시간 퇴장을 대체하는 " +
+                 "2026-08-07 결정 - 스카우트(방치 자동 포획)를 보류하는 대신, 놓친 출몰이 " +
+                 "손실이 되지 않도록 야생이 화면에 남아 계속 돌아다닌다.")]
+        public bool stayUntilCaught = true;
+
+        [Tooltip("남은 체류 시간. stayUntilCaught가 꺼져 있을 때만 쓴다 (원본 동작).")]
         public float stayTime = 50f;
 
         /// <summary>헐떡이는 중 = 무방비. 연출에서 읽는다.</summary>
@@ -71,13 +76,16 @@ namespace Deskmon.Capture
         {
             float dt = Mathf.Min(Time.unscaledDeltaTime, 0.05f);
 
-            // 체류시간은 각인 중에도 흐른다 - 원본과 같다. 다만 떠나는 것은
-            // 각인 중이 아닐 때만 (그리는 도중 사라지면 조작이 허공을 친다).
-            stayTime -= dt;
-            if (stayTime <= 0f && (capture == null || !capture.Engaged))
+            // 체류시간 퇴장은 원본 동작이고, 기본은 "잡힐 때까지 남는다"(stayUntilCaught).
+            // 떠나는 것은 각인 중이 아닐 때만 (그리는 도중 사라지면 조작이 허공을 친다).
+            if (!stayUntilCaught)
             {
-                OnLeave?.Invoke();
-                return;
+                stayTime -= dt;
+                if (stayTime <= 0f && (capture == null || !capture.Engaged))
+                {
+                    OnLeave?.Invoke();
+                    return;
+                }
             }
 
             // 각인 중에는 정지. overlay.html:352

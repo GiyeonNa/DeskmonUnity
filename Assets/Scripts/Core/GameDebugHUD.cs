@@ -85,6 +85,16 @@ namespace Deskmon.Core
 
             // F6: 일괄 진화
             if (GlobalKey.Down(KeyCode.F6)) { _eventT = 0f; _lastEvent = EvolveAll(); }
+
+            // F7: 크로노 강제 (테스트 - 금요일 21시를 기다릴 수 없다).
+            // 주 참여 기록은 남기지 않으므로 본 이벤트에 영향이 없다.
+            if (GlobalKey.Down(KeyCode.F7))
+            {
+                _eventT = 0f;
+                _lastEvent = scheduler != null && scheduler.TriggerChrono(markWeek: false)
+                    ? "크로노 강제 출몰 (F7)"
+                    : "크로노 실패: 이미 출몰 중이거나 데이터 없음";
+            }
         }
 
         string ToggleFirstRoam()
@@ -250,7 +260,7 @@ namespace Deskmon.Core
                 Row("최근", $"<color=#ffe9a3>{_lastEvent}</color>");
 
             GUILayout.Space(4);
-            GUILayout.Label("<size=11>F1 HUD · <b>F2 출몰</b> · F3 세이브 · <b>F4 방목</b> · F5 간식 · F6 진화\n" +
+            GUILayout.Label("<size=11>F1 HUD · <b>F2 출몰</b> · F3 세이브 · <b>F4 방목</b> · F5 간식 · F6 진화 · F7 크로노\n" +
                             "방목 클릭=쓰다듬기 · 우클릭=공놀이 · <b>종료: Ctrl+Alt+Q</b> (전역)</size>", _style);
 
             GUILayout.EndVertical();

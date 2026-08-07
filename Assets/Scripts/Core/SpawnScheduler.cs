@@ -78,7 +78,49 @@ namespace Deskmon.Core
             float speed = working ? 1f / db.balance.boostSpawn : 1f;
 
             _spawnIn -= Time.unscaledDeltaTime * speed;
-            if (_spawnIn <= 0f) Trigger(false);
+            if (_spawnIn <= 0f) { Trigger(false); return; }
+
+            CheckChrono();
+        }
+
+        // ── 크로노 - 글로벌 동시 출몰 (기획 v4 §7.2) ──
+        // 서버 없이 "전 세계가 같은 순간을 겪는" 장치다. 모두의 시계가 금요일
+        // chronoHour(기본 21시)를 가리키는 순간 각자 로컬에서 출몰한다.
+        // index.html:1145-1146 + triggerChrono() 이식.
+
+        /// <summary>주 단위 ID. index.html chronoWeekId() - 주 1회 제한의 키.</summary>
+        public static long ChronoWeekId() => SaveSystem.NowMs() / 604_800_000L;
+
+        void CheckChrono()
+        {
+            if (_save?.ftue == null || !_save.ftue.firstSpawnDone) return;
+
+            var now = System.DateTime.Now;
+            if (now.DayOfWeek != System.DayOfWeek.Friday) return;
+            if (db?.balance == null || now.Hour != db.balance.chronoHour) return;
+            if (_save.lastChrono == ChronoWeekId()) return;
+
+            TriggerChrono(markWeek: true);
+        }
+
+        /// <summary>
+        /// 크로노 강제 출몰. markWeek이면 이번 주 참여로 기록한다 -
+        /// 개발자 테스트(F7)는 기록하지 않아 본 이벤트에 영향을 주지 않는다.
+        /// </summary>
+        public bool TriggerChrono(bool markWeek)
+        {
+            if (_spawnActive || db == null || _save == null) return false;
+
+            var sp = db.Get("chrono");
+            if (sp == null) return false;
+
+            if (markWeek) _save.lastChrono = ChronoWeekId();
+
+            _spawnActive = true;
+            if (_save.ftue != null) _save.ftue.firstSpawnDone = true;
+
+            OnSpawn?.Invoke(sp, Random.value < db.balance.shinyRate);
+            return true;
         }
 
         /// <summary>

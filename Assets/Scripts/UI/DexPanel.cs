@@ -163,6 +163,19 @@ namespace Deskmon.UI
                 var done = UIKit.Label(row, "완성", 11, UIKit.TextGold);
                 UIKit.Fixed(done.gameObject, 30f, 26f);
             }
+
+            // 카드 저장 (기획 v4 §7.3 자랑 공유) - 잡은 종만
+            if (seen)
+            {
+                var cardBtn = UIKit.Button(row, "카드", 10, new Vector2(34f, 22f), () =>
+                {
+                    var game = _ui.Game;
+                    string path = DexCardExporter.Export(sp, game.Save, game.db);
+                    if (path != null)
+                        Application.OpenURL("file://" + System.IO.Path.GetDirectoryName(path));
+                });
+                UIKit.Fixed(cardBtn.gameObject, 34f, 22f);
+            }
         }
 
         void Unlock(FieldData field)

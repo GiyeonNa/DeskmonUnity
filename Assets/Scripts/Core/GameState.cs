@@ -84,7 +84,7 @@ namespace Deskmon.Core
         {
             if (Save == null || db?.balance == null) return;
 
-            bool working = IdleTime.IsWorking(db.balance.workingIdleSec);
+            bool working = DevOverrides.Working(db.balance.workingIdleSec);
 
             // 생산 누적. 베리는 정수로 보여주지만 초당 소수점이라 누적해서 넘긴다.
             _prodAccum += CreatureRegistry.ProductionPerSecond(Save, db, working)

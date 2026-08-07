@@ -74,7 +74,7 @@ namespace Deskmon.Core
             if (_spawnIn >= float.MaxValue) return;   // off
 
             // 작업 중이면 더 자주 나온다. index.html:1151 - spawnIn을 1/boostSpawn 배속으로 깎는다.
-            bool working = IdleTime.IsWorking(db.balance.workingIdleSec);
+            bool working = DevOverrides.Working(db.balance.workingIdleSec);
             float speed = working ? 1f / db.balance.boostSpawn : 1f;
 
             _spawnIn -= Time.unscaledDeltaTime * speed;
@@ -201,7 +201,7 @@ namespace Deskmon.Core
 
         WorldConditions CurrentConditions()
         {
-            bool working = db?.balance != null && IdleTime.IsWorking(db.balance.workingIdleSec);
+            bool working = db?.balance != null && DevOverrides.Working(db.balance.workingIdleSec);
             return WorldConditions.Now(working);
         }
 

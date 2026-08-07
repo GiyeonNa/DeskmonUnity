@@ -86,7 +86,7 @@ namespace Deskmon.UI
 
                 if (_cardProd != null)
                 {
-                    bool working = IdleTime.IsWorking(_game.db.balance.workingIdleSec);
+                    bool working = DevOverrides.Working(_game.db.balance.workingIdleSec);
                     float p = CreatureRegistry.ProductionPerSecond(_game.Save, _game.db, working);
                     _cardProd.text = $"+{p:F1}/초" + (working ? " (부스트)" : "");
                 }

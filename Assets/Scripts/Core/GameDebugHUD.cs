@@ -95,7 +95,53 @@ namespace Deskmon.Core
                     ? "크로노 강제 출몰 (F7)"
                     : "크로노 실패: 이미 출몰 중이거나 데이터 없음";
             }
+
+            // ── DEV 오버라이드 (원본 DEV.time/work/day) - 게이트 실측용 ──
+            // 밤 종 가중·심야 꾸벅이·평일작업 종이접기는 실제 시각을 기다려서는
+            // 검증할 수 없다. 판정만 강제로 바꾼다 (시계/세이브 타임스탬프는 그대로).
+
+            // F8: 시간대 순환 (실제 -> 낮 -> 밤 -> 심야)
+            if (GlobalKey.Down(KeyCode.F8))
+            {
+                _eventT = 0f;
+                DevOverrides.time = (DevOverrides.TimeMode)(((int)DevOverrides.time + 1) % 4);
+                _lastEvent = $"DEV 시간: {TimeName(DevOverrides.time)}";
+            }
+
+            // F9: 작업 상태 순환 (실제 -> 작업중 -> 휴식)
+            if (GlobalKey.Down(KeyCode.F9))
+            {
+                _eventT = 0f;
+                DevOverrides.working = DevOverrides.working == null ? (bool?)true
+                                     : DevOverrides.working == true ? (bool?)false : null;
+                _lastEvent = "DEV 작업: " + (DevOverrides.working == null ? "실제"
+                            : DevOverrides.working.Value ? "작업중" : "휴식");
+            }
+
+            // F10: 요일 순환 (실제 -> 월 -> 금 -> 토). 평일 게이트와 금요일(크로노) 검증용.
+            if (GlobalKey.Down(KeyCode.F10))
+            {
+                _eventT = 0f;
+                DevOverrides.dayOfWeek = DevOverrides.dayOfWeek == null ? (int?)1
+                                       : DevOverrides.dayOfWeek == 1 ? (int?)5
+                                       : DevOverrides.dayOfWeek == 5 ? (int?)6 : null;
+                _lastEvent = "DEV 요일: " + (DevOverrides.dayOfWeek == null ? "실제"
+                            : "일월화수목금토"[DevOverrides.dayOfWeek.Value].ToString());
+            }
+
+            // F12: 오버라이드 전부 해제
+            if (GlobalKey.Down(KeyCode.F12) && DevOverrides.Any)
+            {
+                _eventT = 0f;
+                DevOverrides.Clear();
+                _lastEvent = "DEV 오버라이드 해제";
+            }
         }
+
+        static string TimeName(DevOverrides.TimeMode m)
+            => m == DevOverrides.TimeMode.Real ? "실제"
+             : m == DevOverrides.TimeMode.Day ? "낮"
+             : m == DevOverrides.TimeMode.Night ? "밤" : "심야";
 
         string ToggleFirstRoam()
         {
@@ -241,6 +287,21 @@ namespace Deskmon.Core
 
             Row("유휴", $"{IdleTime.Seconds():F0}s ({(IdleTime.IsWorking() ? "작업중" : "휴식")})");
 
+            // 실효 판정 - 오버라이드가 실제로 게이트에 어떻게 먹었는지를 보여준다.
+            // 이 줄이 없으면 "F8을 눌렀는데 반디가 안 나온다"가 오버라이드 문제인지
+            // 추첨 운인지 구분할 수 없다.
+            if (game?.db?.balance != null)
+            {
+                var w = WorldConditions.Now(DevOverrides.Working(game.db.balance.workingIdleSec));
+                string cond = (w.isLateNight ? "심야" : w.isNight ? "밤" : "낮")
+                            + (w.isFriday ? " · 금" : w.isWeekday ? " · 평일" : " · 주말")
+                            + (w.isWorking ? " · 작업중" : " · 휴식");
+                if (DevOverrides.Any)
+                    Row("판정", $"<color=#ff8f8f>{cond} (DEV: {DevOverrides.Summary()})</color>");
+                else
+                    Row("판정", cond);
+            }
+
             // 방목 + 첫 개체의 친밀도. 친밀도가 진화 엔진이라 진행이 보여야 한다.
             if (game?.Save != null && game.db?.balance != null)
             {
@@ -261,6 +322,7 @@ namespace Deskmon.Core
 
             GUILayout.Space(4);
             GUILayout.Label("<size=11>F1 HUD · <b>F2 출몰</b> · F3 세이브 · <b>F4 방목</b> · F5 간식 · F6 진화 · F7 크로노\n" +
+                            "<b>F8 시간</b> · F9 작업 · F10 요일 · F12 해제 (DEV 오버라이드)\n" +
                             "방목 클릭=쓰다듬기 · 우클릭=공놀이 · <b>종료: Ctrl+Alt+Q</b> (전역)</size>", _style);
 
             GUILayout.EndVertical();

@@ -125,19 +125,33 @@ namespace Deskmon.Core
         public bool isFriday;
         public bool isWorking;    // 유휴 < BOOST.idleSec
 
-        /// <summary>실제 시계 + 유휴 상태로 채운다. index.html:206-211과 같은 경계값.</summary>
+        /// <summary>
+        /// 실제 시계 + 유휴 상태로 채운다. index.html:206-211과 같은 경계값.
+        /// DevOverrides가 켜져 있으면 여기서 판정을 덮어쓴다 - 게이트를 읽는 모든 곳이
+        /// 이 함수를 거치므로, 오버라이드도 여기 한 곳에만 있으면 된다.
+        /// </summary>
         public static WorldConditions Now(bool working)
         {
             var now = System.DateTime.Now;
             int h = now.Hour;
-            int dow = (int)now.DayOfWeek;   // 0=일 … 6=토, JS Date.getDay()와 같다
+            int dow = DevOverrides.dayOfWeek ?? (int)now.DayOfWeek;   // 0=일 … 6=토
+
+            bool night, lateNight;
+            switch (DevOverrides.time)
+            {
+                case DevOverrides.TimeMode.Day:       night = false; lateNight = false; break;
+                case DevOverrides.TimeMode.Night:     night = true;  lateNight = false; break;
+                case DevOverrides.TimeMode.LateNight: night = true;  lateNight = true;  break;
+                default: night = h >= 18 || h < 6; lateNight = h < 6; break;
+            }
+
             return new WorldConditions
             {
-                isNight     = h >= 18 || h < 6,
-                isLateNight = h < 6,
+                isNight     = night,
+                isLateNight = lateNight,
                 isWeekday   = dow >= 1 && dow <= 5,
                 isFriday    = dow == 5,
-                isWorking   = working,
+                isWorking   = DevOverrides.working ?? working,
             };
         }
     }

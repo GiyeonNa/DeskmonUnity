@@ -68,6 +68,19 @@ Unity.exe -quit -batchmode -nographics \
 
 산출물은 `Build/Deskmon/Deskmon.exe` (저장소에서 제외됨).
 
+### 패키징 (인스톨러)
+
+1. `Deskmon/빌드만 (배포)` — 개발 HUD/치트 키가 빠진 배포 빌드
+2. Inno Setup 6 설치 후:
+   ```sh
+   "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" Tools\Installer\Deskmon.iss
+   ```
+3. 산출물: `Build/Installer/Deskmon-Setup-<버전>.exe`
+   — 사용자별 설치(관리자 불필요), 로그인 시 자동 시작 옵션, 제거 시 세이브 유지
+
+코드 서명은 인증서 확보 후 `Deskmon.iss`의 SignTool 주석을 해제한다.
+이 앱은 투명 오버레이 + 전역 키 폴링이라 서명 없이는 백신 오탐 확률이 높다.
+
 ### 검증 도구
 
 - `Deskmon/각인 UI 테스트 씬 생성` — 문양을 직접 그려본다. 이전/다음으로 8종 순회

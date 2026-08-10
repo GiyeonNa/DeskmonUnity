@@ -88,6 +88,7 @@ namespace Deskmon.Creatures
                 Mathf.Clamp(self.y + Random.Range(-50f, 30f), 70f, Screen.height * 0.7f));
 
             BallToy.Throw(self + new Vector2(0f, 8f), to);
+            Sfx.Grab();   // 던지기음 - overlay.html throwBall
 
             _playHome = self;
             _fetching = true;
@@ -145,6 +146,7 @@ namespace Deskmon.Creatures
                 }
 
                 if (effects != null) effects.PlayPet(ScreenPos());
+                Sfx.Pet();   // 물어온 보상음
                 _view.Pause(1f);
             }
         }
@@ -181,6 +183,7 @@ namespace Deskmon.Creatures
             }
 
             SaveSystem.Save(game.Save);
+            Sfx.Pet();
             OnPetted?.Invoke(result);
         }
     }

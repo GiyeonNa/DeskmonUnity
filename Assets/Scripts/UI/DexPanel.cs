@@ -186,6 +186,7 @@ namespace Deskmon.UI
 
             game.Save.berry -= field.unlockCost;
             game.Save.habitats.Add(SpawnScheduler.FieldId(field.id));
+            Sfx.Unlock();
 
             // 해금은 방목 슬롯(+1)과 출몰 풀에 즉시 반영된다
             SaveSystem.Save(game.Save);

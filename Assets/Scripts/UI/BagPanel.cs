@@ -120,7 +120,7 @@ namespace Deskmon.UI
             var snackBtn = UIKit.Button(row, "간식", 11, new Vector2(40f, 34f), () =>
             {
                 var r = FriendshipSystem.Snack(save, db.balance, sp.id, stage);
-                if (r.ok) AfterChange();
+                if (r.ok) { Sfx.Pet(); AfterChange(); }
             });
             if (save.berry < db.balance.snackCost)
                 snackBtn.interactable = false;
@@ -134,7 +134,8 @@ namespace Deskmon.UI
                 {
                     var world = WorldConditions.Now(
                         IdleTime.IsWorking(db.balance.workingIdleSec));
-                    EvolutionSystem.TryEvolve(save, db, sp.id, stage, shiny, world);
+                    if (EvolutionSystem.TryEvolve(save, db, sp.id, stage, shiny, world)
+                        == EvolutionSystem.BlockReason.None) Sfx.Evolve();
                     AfterChange();
                 });
                 UIKit.SetButtonOn(evoBtn, true);

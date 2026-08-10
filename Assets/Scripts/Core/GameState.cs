@@ -189,10 +189,16 @@ namespace Deskmon.Core
             _capture.OnGlyphSuccess += () =>
             {
                 if (_wild != null) effects.PlayGlyphSuccess(ScreenPosOf(_wild.transform));
+                Sfx.Pet();      // overlay.html endStroke 성공 분기와 동일
             };
+            _capture.OnGlyphFail += Sfx.Escape;
 
             _capture.OnCaptured += () => HandleCaptured(species, shiny, behavior, caughtAnim);
             behavior.OnLeave += HandleLeave;
+
+            // 출현음. 샤이니/전설은 아르페지오를 겹친다 - overlay.html:180-181
+            Sfx.Appear();
+            if (shiny || species.rarity == Rarity.Legendary) Sfx.Shiny();
         }
 
         /// <summary>체류시간. 전설은 더 오래 머문다 - 놓치면 다시 보기 어려우므로.</summary>
@@ -214,6 +220,11 @@ namespace Deskmon.Core
         {
             var result = CreatureRegistry.Add(Save, db, species, shiny);
             SaveSystem.Save(Save);
+
+            // 포획음 + 샤이니/전설 겹침 (doCatch와 동일). 마일스톤 보상이 있으면 팡파르.
+            Sfx.CatchIt();
+            if (shiny || species.rarity == Rarity.Legendary) Sfx.Shiny();
+            if (result.berryGained > 0) Sfx.Unlock();
 
             Debug.Log($"[GameState] 포획 - {species.displayName}{(shiny ? " (샤이니)" : "")}"
                       + (result.berryGained > 0 ? $" 베리 +{result.berryGained}" : ""));

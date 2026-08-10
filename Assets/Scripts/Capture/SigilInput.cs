@@ -114,6 +114,7 @@ namespace Deskmon.Capture
             if (Vector2.Distance(cursor, WildScreenPos()) <= engageRadius)
             {
                 _capture.Engage();
+                Deskmon.Core.Sfx.Grab();   // 각인 시작음 - overlay.html:305
                 _capture.BeginStroke(cursor);
             }
         }

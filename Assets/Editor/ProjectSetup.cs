@@ -83,6 +83,7 @@ namespace Deskmon.EditorTools
             QualitySettings.vSyncCount = 1;
 
             EnsureIncludedShaders();
+            EnsureAppIcon();
 
             AssetDatabase.SaveAssets();
             if (verbose) Debug.Log("[Deskmon] 프로젝트 설정 적용 완료.");
@@ -115,6 +116,32 @@ namespace Deskmon.EditorTools
             so.ApplyModifiedProperties();
 
             Debug.Log("[Deskmon] PaletteSwap 셰이더를 빌드 포함 목록에 추가했습니다.");
+        }
+
+        /// <summary>
+        /// 앱 아이콘 등록. Unity가 빌드 시 이 텍스처로 exe 아이콘(전 크기)을 만든다.
+        /// 인스톨러 아이콘(.ico)은 별개 - Tools/MakeIcon.ps1이 같은 원본에서 생성한다.
+        /// </summary>
+        static void EnsureAppIcon()
+        {
+            const string PATH = "Assets/AppIcon/deskmon_app_icon_1024.png";
+            var tex = AssetDatabase.LoadAssetAtPath<Texture2D>(PATH);
+            if (tex == null) return;   // 아이콘이 아직 없는 저장소 상태도 정상이다
+
+            // 압축 아티팩트가 아이콘에 그대로 박히지 않게 무압축으로
+            var imp = AssetImporter.GetAtPath(PATH) as TextureImporter;
+            if (imp != null && imp.textureCompression != TextureImporterCompression.Uncompressed)
+            {
+                imp.textureCompression = TextureImporterCompression.Uncompressed;
+                imp.mipmapEnabled = false;
+                imp.SaveAndReimport();
+            }
+
+            var current = PlayerSettings.GetIcons(NamedBuildTarget.Unknown, IconKind.Any);
+            if (current != null && current.Length > 0 && current[0] == tex) return;
+
+            PlayerSettings.SetIcons(NamedBuildTarget.Unknown, new[] { tex }, IconKind.Any);
+            Debug.Log("[Deskmon] 앱 아이콘 등록: deskmon_app_icon_1024");
         }
     }
 }

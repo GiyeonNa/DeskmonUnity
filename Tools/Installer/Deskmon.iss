@@ -36,8 +36,9 @@ Compression=lzma2
 SolidCompression=yes
 WizardStyle=modern
 CloseApplications=yes
-; 아이콘이 생성되면 주석 해제 (UI_이미지_기획서 §5.16 app_icon)
-; SetupIconFile=..\..\Assets\Sprites\UI\app_icon.ico
+; Tools/MakeIcon.ps1 이 생성한다 - 원본(Assets/AppIcon)이 바뀌면 다시 실행
+SetupIconFile=deskmon.ico
+UninstallDisplayIcon={app}\{#MyAppExeName}
 
 ; 코드 서명 - 인증서를 확보하면 주석 해제하고 Inno 설정에서 SignTool을 등록한다.
 ; 이 앱은 투명 오버레이 + 전역 키 폴링이라 백신 휴리스틱에 특히 잘 걸린다.

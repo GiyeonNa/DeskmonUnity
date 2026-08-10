@@ -323,6 +323,17 @@ namespace Deskmon.UI
             }
         }
 
+        static string RarityName(Rarity r)
+        {
+            switch (r)
+            {
+                case Rarity.Rare: return "희귀";
+                case Rarity.Epic: return "에픽";
+                case Rarity.Legendary: return "전설";
+                default: return "일반";
+            }
+        }
+
         void CloseDetail()
         {
             if (_detail != null) _detail.SetActive(false);

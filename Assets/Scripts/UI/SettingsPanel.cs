@@ -23,7 +23,7 @@ namespace Deskmon.UI
         public SettingsPanel(Transform parent, UIRoot ui)
         {
             _ui = ui;
-            Root = UIKit.Panel(parent, "SettingsPanel", new Vector2(320f, 150f),
+            Root = UIKit.Panel(parent, "SettingsPanel", new Vector2(320f, 200f),
                                new Vector2(1f, 0f), Vector2.zero);
 
             var v = UIKit.VList(Root.transform, 6f);
@@ -40,6 +40,31 @@ namespace Deskmon.UI
             UIKit.Fixed(UIKit.Label(v,
                 "끄면 야생이 나오지 않습니다. 방목과 생산은 계속됩니다.",
                 11, UIKit.TextSub).gameObject, 0f, 30f);
+
+            // ── 종료 ──
+            // 이 앱은 Alt+Tab에도 작업표시줄에도 안 뜬다. 전역 핫키(Ctrl+Alt+Q)는
+            // 개발자용 안전장치이지 일반 사용자가 알 수 있는 것이 아니므로,
+            // 눈에 보이는 종료 수단은 이 버튼이 유일하다. 배포 필수 요소다.
+            var quitRow = UIKit.HRow(v, 30f);
+            UIKit.Fixed(quitRow.gameObject, 0f, 30f);
+
+            var quit = UIKit.Button(quitRow, "데스크몬 종료", 12, new Vector2(120f, 28f), Quit);
+            quit.GetComponent<UnityEngine.UI.Image>().color = new Color(1f, 0.72f, 0.72f, 1f);
+            UIKit.Fixed(quit.gameObject, 120f, 28f);
+
+            UIKit.Fixed(UIKit.Label(v,
+                "저장 후 종료합니다. 다시 켤 때까지 몬스터도 쉽니다.",
+                11, UIKit.TextSub).gameObject, 0f, 16f);
+        }
+
+        static void Quit()
+        {
+            // 저장은 GameState.OnApplicationQuit이 담당한다 - 여기서 또 하면 이중 저장.
+#if UNITY_EDITOR
+            UnityEditor.EditorApplication.isPlaying = false;
+#else
+            Application.Quit();
+#endif
         }
 
         public void Refresh()

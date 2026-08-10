@@ -33,6 +33,9 @@ namespace Deskmon.EditorTools
             PlayerSettings.companyName = "Deskmon";
             PlayerSettings.productName = "Deskmon";
 
+            // 배포 버전. S5(패키징) 단계라 0.9 - 151종 도감 확장이 1.0의 몫이다.
+            PlayerSettings.bundleVersion = "0.9.0";
+
             // ── 창: 테두리 없는 창모드. 전체화면이면 투명이 성립하지 않는다 ──
             PlayerSettings.fullScreenMode = FullScreenMode.Windowed;
             PlayerSettings.defaultIsNativeResolution = false;

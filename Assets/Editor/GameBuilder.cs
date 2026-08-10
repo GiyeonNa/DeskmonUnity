@@ -18,22 +18,28 @@ namespace Deskmon.EditorTools
         const string OUT_DIR = "Build/Deskmon";
         const string EXE = "Deskmon.exe";
 
-        [MenuItem("Deskmon/빌드 후 실행")]
-        public static void BuildAndRun() => Run(true);
+        // 기본 메뉴 = 배포판. Development 플래그가 꺼진 빌드에서는 GameDebugHUD가
+        // 스스로 사라지므로(Debug.isDebugBuild 게이트) 개발 도구가 자동으로 빠진다.
+        [MenuItem("Deskmon/빌드 후 실행 (배포)")]
+        public static void BuildAndRun() => Run(true, dev: false);
 
-        [MenuItem("Deskmon/빌드만")]
-        public static void BuildOnly() => Run(false);
+        [MenuItem("Deskmon/빌드만 (배포)")]
+        public static void BuildOnly() => Run(false, dev: false);
 
-        /// <summary>CLI용 — 실패 시 exit code 1.</summary>
+        // 개발 빌드 - HUD와 F키(즉시 출몰/일괄 진화/시간 조작)가 살아있다.
+        [MenuItem("Deskmon/개발 빌드 후 실행")]
+        public static void BuildAndRunDev() => Run(true, dev: true);
+
+        /// <summary>CLI용 — 실패 시 exit code 1. 배포판을 만든다.</summary>
         public static void CI()
         {
-            var report = Build();
+            var report = Build(dev: false);
             EditorApplication.Exit(report.summary.result == BuildResult.Succeeded ? 0 : 1);
         }
 
-        static void Run(bool launch)
+        static void Run(bool launch, bool dev)
         {
-            var report = Build();
+            var report = Build(dev);
             if (report.summary.result != BuildResult.Succeeded)
             {
                 Debug.LogError($"[Deskmon] 빌드 실패: {report.summary.result}");
@@ -46,7 +52,7 @@ namespace Deskmon.EditorTools
             if (launch) Process.Start(new ProcessStartInfo(Path.GetFullPath(exe)) { UseShellExecute = true });
         }
 
-        static BuildReport Build()
+        static BuildReport Build(bool dev)
         {
             ProjectSetup.ApplyMenu();
             Directory.CreateDirectory(OUT_DIR);
@@ -66,7 +72,7 @@ namespace Deskmon.EditorTools
                 scenes = System.Array.ConvertAll(scenes, s => s.path),
                 locationPathName = Path.Combine(OUT_DIR, EXE),
                 target = BuildTarget.StandaloneWindows64,
-                options = BuildOptions.None,
+                options = dev ? BuildOptions.Development : BuildOptions.None,
             };
 
             return BuildPipeline.BuildPlayer(opts);

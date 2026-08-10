@@ -88,6 +88,7 @@ Assets/Sprites/UI/<asset_id>.png
 | fx_heart | fx | 10x10 | - | 쓰다듬기 하트 | `CaptureEffects.PlayPet` | 하트 (외곽선 포함) | draft |
 | fx_spark | fx | 8x8 | - | 포획 반짝이 | `CaptureEffects` | 4각 별 | draft |
 | fx_ring | fx | 32x32 | - | 포획 링 | `CaptureEffects` | 얇은 원 고리 | draft |
+| app_icon | icon | 256x256 | - | exe/인스톨러 아이콘 | `PlayerSettings` 아이콘 (패키징) | 몽글이 얼굴 클로즈업 | todo |
 
 ## 5. 개별 명세와 생성 프롬프트
 
@@ -241,6 +242,15 @@ Constraints: one badge only; no text; no watermark; no creature; do not use #ff0
 - fx_heart: 5.6과 같되 10x10, 외곽선 포함 (바탕화면 위에 단독으로 뜬다)
 - fx_spark: 5.10과 같되 8x8
 - fx_ring: 32x32, 두께 2px의 금색 원 고리. 코드가 확대해 쓰므로 완전한 원이어야 한다
+
+### 5.16 app_icon - exe/인스톨러 아이콘 (패키징용)
+
+- 요구: 몽글이 얼굴 클로즈업. 작업표시줄 16px에서도 "초록 젤리"로 읽혀야 하므로
+  몸 전체가 아니라 얼굴 위주로 크게. 배경은 투명이 아니라 **원형 토큰**(ui_badge와
+  같은 문법) - Windows 아이콘은 밝은/어두운 배경 어디에나 놓인다.
+- 256x256 한 장이면 된다. Unity가 다운스케일 세트(48/32/16)를 자동 생성한다.
+- 프롬프트: 5.12(ui_badge) 골격에서 Subject만 교체 -
+  `A close-up face of a cute round green jelly monster with a small sprout leaf on top, on a round dark-green token with light green rim.`
 
 ## 6. 후처리 규칙
 

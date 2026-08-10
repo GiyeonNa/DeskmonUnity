@@ -27,6 +27,19 @@ namespace Deskmon.Core
         /// <summary>내용 실측 높이. 첫 프레임은 대략값으로 시작해 다음 프레임부터 맞는다.</summary>
         float _measuredHeight = 250f;
 
+        void Awake()
+        {
+            // 배포 빌드에서는 통째로 사라진다. HUD만이 아니라 F2(즉시 출몰)·F6(일괄 진화)·
+            // F8~F10(시간 조작) 같은 치트성 키가 전부 이 컴포넌트에 있으므로,
+            // 이 게이트 하나로 배포판의 개발 도구가 모두 막힌다.
+            // Development Build 체크박스([Deskmon/개발 빌드 후 실행])를 켠 빌드에서만 살아난다.
+            if (!Application.isEditor && !Debug.isDebugBuild)
+            {
+                Destroy(this);
+                return;
+            }
+        }
+
         void Start()
         {
             if (game == null) game = FindFirstObjectByType<GameState>();

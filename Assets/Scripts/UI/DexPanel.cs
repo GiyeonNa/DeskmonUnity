@@ -17,6 +17,12 @@ namespace Deskmon.UI
 
         readonly UIRoot _ui;
         readonly RectTransform _list;
+        readonly GameObject _scrollView;
+
+        // 상세 보기 - 종 하나를 크게. 좌우로 도감 번호를 순환한다.
+        GameObject _detail;
+        int _detailIndex = -1;
+        bool DetailOpen => _detail != null && _detail.activeSelf;
 
         public DexPanel(Transform parent, UIRoot ui)
         {
@@ -32,10 +38,14 @@ namespace Deskmon.UI
             UIKit.Fixed(header.gameObject, 0f, 20f);
 
             _list = UIKit.ScrollList(v, 330f);
+            _scrollView = _list.parent.gameObject;   // ScrollList의 뷰포트 - 상세와 교대한다
         }
 
         public void Refresh()
         {
+            // 상세가 열려 있으면 상세를 다시 그린다 (포획 등으로 상태가 바뀌었을 수 있다)
+            if (DetailOpen) { ShowDetail(_detailIndex); return; }
+
             foreach (Transform child in _list) Object.Destroy(child.gameObject);
 
             var game = _ui.Game;
@@ -111,6 +121,15 @@ namespace Deskmon.UI
             var row = UIKit.HRow(_list, 30f, 6f);
             UIKit.Fixed(row.gameObject, 0f, 30f);
 
+            // 줄 전체 클릭 = 상세 보기. 투명하지만 레이캐스트는 받는 배경 -
+            // 위에 얹힌 개별 버튼(카드)이 먼저 클릭을 가져가므로 충돌하지 않는다.
+            var rowBg = row.gameObject.AddComponent<Image>();
+            rowBg.color = Color.clear;
+            var rowBtn = row.gameObject.AddComponent<Button>();
+            rowBtn.targetGraphic = rowBg;
+            int idx = _ui.Game.db.species.IndexOf(sp);
+            rowBtn.onClick.AddListener(() => ShowDetail(idx));
+
             var icon = UIKit.SpriteIcon(row, sp.SpriteAt(0), 26f);
             if (!seen) icon.color = new Color(0f, 0f, 0f, 0.55f);   // 실루엣
             UIKit.Fixed(icon.gameObject, 26f, 26f);
@@ -119,15 +138,43 @@ namespace Deskmon.UI
                                    seen ? UIKit.TextMain : UIKit.TextSub);
             UIKit.Fixed(name.gameObject, 92f, 26f);
 
-            // 폼 칸 - 수집한 폼은 초록, 샤이니까지 있으면 금색
+            BuildFormCells(row, sp, dx, 14f);
+
+            if (dx.milestone)
+            {
+                var done = UIKit.Label(row, "완성", 11, UIKit.TextGold);
+                UIKit.Fixed(done.gameObject, 30f, 26f);
+            }
+
+            // 카드 저장 (기획 v4 §7.3 자랑 공유) - 잡은 종만
+            if (seen)
+            {
+                var cardBtn = UIKit.Button(row, "카드", 10, new Vector2(34f, 22f), () =>
+                {
+                    var game = _ui.Game;
+                    string path = DexCardExporter.Export(sp, game.Save, game.db);
+                    if (path != null)
+                        Application.OpenURL("file://" + System.IO.Path.GetDirectoryName(path));
+                });
+                UIKit.Fixed(cardBtn.gameObject, 34f, 22f);
+            }
+        }
+
+        /// <summary>
+        /// 폼 수집 칸. 수집한 폼은 초록, 샤이니까지 있으면 금색.
+        /// 홈 프레임(테마)이 있으면 미수집이어도 칸 자체는 보인다 -
+        /// "여기 채울 자리가 있다"는 정보다. 목록과 상세가 공유한다.
+        /// </summary>
+        static void BuildFormCells(Transform parent, SpeciesData sp, SaveData.DexEntry dx, float size)
+        {
             var theme = UIKit.Theme;
             for (int f = 0; f < sp.forms; f++)
             {
                 var cell = new GameObject("Form", typeof(RectTransform), typeof(Image));
-                cell.transform.SetParent(row, false);
+                cell.transform.SetParent(parent, false);
                 var img = cell.GetComponent<Image>();
                 img.raycastTarget = false;
-                UIKit.Fixed(cell, 14f, 14f);
+                UIKit.Fixed(cell, size, size);
 
                 Color state = dx.shinyForms[f] ? UIKit.TextGold
                             : dx.forms[f] ? UIKit.Accent
@@ -135,8 +182,6 @@ namespace Deskmon.UI
 
                 if (theme != null && theme.frameCell != null)
                 {
-                    // 홈 프레임 + 수집 상태를 안쪽 채움으로. 프레임이 빈 칸을 표현하므로
-                    // 미수집이어도 칸 자체는 보인다 - "여기 채울 자리가 있다"는 정보다.
                     img.sprite = theme.frameCell;
                     img.color = Color.white;
 
@@ -157,25 +202,133 @@ namespace Deskmon.UI
                     img.color = state == Color.clear ? new Color(1f, 1f, 1f, 0.12f) : state;
                 }
             }
+        }
 
-            if (dx.milestone)
+        // ── 상세 보기 ──
+
+        /// <summary>
+        /// 종 하나를 크게 보여준다. index는 도감 번호(-1)이고 좌우로 순환한다.
+        /// 미포획이면 실루엣 + ??? + 설명 숨김 - 목록과 같은 규칙이다.
+        /// </summary>
+        void ShowDetail(int index)
+        {
+            var game = _ui.Game;
+            var db = game?.db;
+            if (db == null || db.species.Count == 0 || game.Save == null) return;
+
+            int n = db.species.Count;
+            _detailIndex = (index % n + n) % n;   // 음수 안전 순환
+
+            var sp = db.species[_detailIndex];
+            var save = game.Save;
+            var dx = save.Dex(sp.id);
+            bool seen = dx.caught > 0;
+
+            _scrollView.SetActive(false);
+            if (_detail == null)
             {
-                var done = UIKit.Label(row, "완성", 11, UIKit.TextGold);
-                UIKit.Fixed(done.gameObject, 30f, 26f);
+                _detail = new GameObject("Detail", typeof(RectTransform));
+                _detail.transform.SetParent(_scrollView.transform.parent, false);
+                UIKit.Fixed(_detail, 0f, 330f);
+            }
+            _detail.SetActive(true);
+            foreach (Transform c in _detail.transform) Object.Destroy(c.gameObject);
+
+            var v = UIKit.VList(_detail.transform, 6f, new RectOffset(4, 4, 4, 4));
+            UIKit.Stretch(v);
+
+            // 내비게이션: 이전/번호/다음/목록
+            var nav = UIKit.HRow(v, 26f);
+            UIKit.Fixed(nav.gameObject, 0f, 26f);
+
+            var prev = UIKit.Button(nav, "<", 14, new Vector2(34f, 24f),
+                                    () => ShowDetail(_detailIndex - 1));
+            UIKit.Fixed(prev.gameObject, 34f, 24f);
+
+            var no = UIKit.Label(nav, $"No.{_detailIndex + 1:000}", 13, UIKit.TextSub,
+                                 TextAnchor.MiddleCenter);
+            UIKit.Fixed(no.gameObject, 70f, 24f);
+
+            var next = UIKit.Button(nav, ">", 14, new Vector2(34f, 24f),
+                                    () => ShowDetail(_detailIndex + 1));
+            UIKit.Fixed(next.gameObject, 34f, 24f);
+
+            var back = UIKit.Button(nav, "목록", 12, new Vector2(50f, 24f), CloseDetail);
+            UIKit.Fixed(back.gameObject, 50f, 24f);
+
+            // 본체: 큰 아이콘 + 정보
+            var body = UIKit.HRow(v, 100f, 10f);
+            UIKit.Fixed(body.gameObject, 0f, 100f);
+
+            var icon = UIKit.SpriteIcon(body, sp.SpriteAt(0), 96f);
+            if (!seen) icon.color = new Color(0f, 0f, 0f, 0.55f);   // 실루엣
+            UIKit.Fixed(icon.gameObject, 96f, 96f);
+
+            var info = UIKit.VList(body, 3f, new RectOffset(0, 0, 0, 0));
+            UIKit.Fixed(info.gameObject, 176f, 100f);
+
+            var nameLabel = UIKit.Label(info, seen ? sp.displayName : "???", 17,
+                                        seen ? UIKit.TextMain : UIKit.TextSub);
+            nameLabel.fontStyle = FontStyle.Bold;
+            UIKit.Fixed(nameLabel.gameObject, 0f, 22f);
+
+            // 필드는 목록에서도 보이는 정보라 미포획이어도 표시한다. 희귀도는 숨긴다.
+            var field = db.GetField(sp.field);
+            string meta = (field != null ? field.displayName : sp.field.ToString())
+                        + " · " + (seen ? RarityName(sp.rarity) : "???");
+            if (sp.field == Field.Lake && !string.IsNullOrEmpty(save.faction))
+                meta += save.faction == "dew" ? " · 이슬 팀" : " · 이끼 팀";
+            UIKit.Fixed(UIKit.Label(info, meta, 12, UIKit.Accent).gameObject, 0f, 16f);
+
+            // 진화 라인 - 만난 폼만 이름을 보여준다
+            if (sp.forms > 1)
+            {
+                var names = new string[sp.forms];
+                for (int i = 0; i < sp.forms; i++)
+                    names[i] = (dx.forms[i] || dx.shinyForms[i]) ? sp.NameAt(i) : "???";
+                UIKit.Fixed(UIKit.Label(info, string.Join(" → ", names), 11, UIKit.TextSub)
+                    .gameObject, 0f, 16f);
             }
 
-            // 카드 저장 (기획 v4 §7.3 자랑 공유) - 잡은 종만
+            var cellRow = UIKit.HRow(info, 18f, 4f);
+            UIKit.Fixed(cellRow.gameObject, 0f, 18f);
+            BuildFormCells(cellRow, sp, dx, 16f);
+            if (dx.milestone)
+            {
+                var done = UIKit.Label(cellRow, "라인 완성", 11, UIKit.TextGold);
+                UIKit.Fixed(done.gameObject, 60f, 16f);
+            }
+
+            UIKit.Fixed(UIKit.Label(info, seen ? $"포획 {dx.caught}회" : "", 11, UIKit.TextSub)
+                .gameObject, 0f, 14f);
+
+            // 설명 - 미포획이면 감춘다. 도감은 만나야 채워지는 책이다.
+            var desc = UIKit.Label(v, seen ? sp.description : "아직 만나지 못한 몬스터입니다.",
+                                   13, seen ? UIKit.TextMain : UIKit.TextSub);
+            desc.horizontalOverflow = HorizontalWrapMode.Wrap;
+            desc.alignment = TextAnchor.UpperLeft;
+            UIKit.Fixed(desc.gameObject, 0f, 80f);
+
             if (seen)
             {
-                var cardBtn = UIKit.Button(row, "카드", 10, new Vector2(34f, 22f), () =>
+                var actions = UIKit.HRow(v, 28f);
+                UIKit.Fixed(actions.gameObject, 0f, 28f);
+                var card = UIKit.Button(actions, "카드 저장", 12, new Vector2(90f, 26f), () =>
                 {
-                    var game = _ui.Game;
-                    string path = DexCardExporter.Export(sp, game.Save, game.db);
+                    string path = DexCardExporter.Export(sp, save, db);
                     if (path != null)
                         Application.OpenURL("file://" + System.IO.Path.GetDirectoryName(path));
                 });
-                UIKit.Fixed(cardBtn.gameObject, 34f, 22f);
+                UIKit.Fixed(card.gameObject, 90f, 26f);
             }
+        }
+
+        void CloseDetail()
+        {
+            if (_detail != null) _detail.SetActive(false);
+            _scrollView.SetActive(true);
+            _detailIndex = -1;
+            Refresh();   // 상세에서 바뀐 상태(포획 등)가 목록에도 반영되게
         }
 
         void Unlock(FieldData field)

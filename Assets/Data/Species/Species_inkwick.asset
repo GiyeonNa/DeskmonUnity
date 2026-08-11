@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9188220925321eb49aa5908fdad59c8b, type: 3}
+  m_Name: Species_inkwick
+  m_EditorClassIdentifier: 
+  id: inkwick
+  displayName: "\uC789\uD06C\uC705"
+  description: "\uC789\uD06C\uBCD1 \uC18D\uC5D0\uC11C \uAE68\uC5B4\uB09C \uC0DD\uBB3C\uB85C,
+    \uAC10\uC815\uC5D0 \uB530\uB77C \uBAB8 \uC0C9\uC774 \uC870\uAE08\uC529 \uC9D9\uC5B4\uC9C4\uB2E4."
+  field: 3
+  subfield: Ink
+  rarity: 1
+  forms: 2
+  formNames:
+  - "\uC789\uD06C\uC705"
+  - "\uBA39\uBB3C\uB9DD\uD1A0"
+  formIds:
+  - inkwick
+  - inkveil
+  formDexNos: 4000000041000000
+  formSprites:
+  - {fileID: 21300000, guid: e7a91c80c77c9d545ba114bc833abec6, type: 3}
+  - {fileID: 21300000, guid: 20813e2d126305141b60cfad19d5fe4d, type: 3}
+  bodyColor: {r: 0.13333324, g: 0.20000039, b: 0.26666647, a: 1}
+  shinyColor: {r: 0.35, g: 0.33599928, b: 0.175, a: 1}
+  rainbow: 0
+  hop: 0
+  nightOnly: 0
+  gate: 0
+  faction: 0
+  eventOnly: 0
+  evolveCondition: 0
+  pattern: 1

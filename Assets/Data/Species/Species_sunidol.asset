@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9188220925321eb49aa5908fdad59c8b, type: 3}
+  m_Name: Species_sunidol
+  m_EditorClassIdentifier: 
+  id: sunidol
+  displayName: "\uD574\uBB38\uC0C1"
+  description: "\uD0DC\uC591 \uBB38\uC591\uC774 \uC0C8\uACA8\uC9C4 \uC11D\uC0C1 \uC0DD\uBB3C\uB85C,
+    \uD587\uBE5B\uC744 \uBC1B\uC73C\uBA74 \uC5BC\uAD74 \uBB34\uB2AC\uAC00 \uC120\uBA85\uD574\uC9C4\uB2E4."
+  field: 11
+  subfield: Sun
+  rarity: 2
+  forms: 1
+  formNames:
+  - "\uD574\uBB38\uC0C1"
+  formIds:
+  - sunidol
+  formDexNos: 7c000000
+  formSprites:
+  - {fileID: 21300000, guid: 0598dc751a3fe0d47a359904d8327489, type: 3}
+  bodyColor: {r: 0.6666666, g: 0.5333332, b: 0.3333333, a: 1}
+  shinyColor: {r: 0.3333333, g: 0.52666676, b: 0.6666666, a: 1}
+  rainbow: 0
+  hop: 0
+  nightOnly: 0
+  gate: 0
+  faction: 0
+  eventOnly: 0
+  evolveCondition: 0
+  pattern: 2

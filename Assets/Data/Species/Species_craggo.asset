@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9188220925321eb49aa5908fdad59c8b, type: 3}
+  m_Name: Species_craggo
+  m_EditorClassIdentifier: 
+  id: craggo
+  displayName: "\uD06C\uB798\uACE0"
+  description: "\uC808\uBCBD \uC870\uAC01 \uAC19\uC740 \uBAB8\uC744 \uAC00\uC9C4
+    \uC0DD\uBB3C\uB85C, \uB192\uC740 \uBC14\uC704\uB97C \uAC81\uB0B4\uC9C0 \uC54A\uB294\uB2E4."
+  field: 7
+  subfield: Cliff
+  rarity: 0
+  forms: 3
+  formNames:
+  - "\uD06C\uB798\uACE0"
+  - "\uBC14\uC704\uBFD4"
+  - "\uC808\uBCBD\uAD70"
+  formIds:
+  - craggo
+  - cragrin
+  - craglord
+  formDexNos: 510000005200000053000000
+  formSprites:
+  - {fileID: 21300000, guid: e595c5010e06d294ba3d8ceb7fcda42e, type: 3}
+  - {fileID: 21300000, guid: 4ebfe1dc21c1f8f4ebf7e02265173e1b, type: 3}
+  - {fileID: 21300000, guid: 4587c0edff58af248890bbcfc5f6907c, type: 3}
+  bodyColor: {r: 0.8000019, g: 0.7333334, b: 0.6000001, a: 1}
+  shinyColor: {r: 0.6000001, g: 0.8000019, b: 0.7653337, a: 1}
+  rainbow: 0
+  hop: 0
+  nightOnly: 0
+  gate: 0
+  faction: 0
+  eventOnly: 0
+  evolveCondition: 0
+  pattern: 0

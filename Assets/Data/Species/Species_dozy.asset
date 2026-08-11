@@ -14,19 +14,26 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: dozy
   displayName: "\uAFB8\uBC85\uC774"
-  description: "\uAE4A\uC740 \uBC24\uC5D0\uB9CC \uC2A4\uB974\uB975 \uB098\uD0C0\uB098\uB294
-    \uC7A0\uC758 \uBAAC\uC2A4\uD130."
+  description: "\uC878\uC74C\uC774 \uBB49\uCCD0 \uC0DD\uAE34 \uB290\uAE0B\uD55C \uC0DD\uBB3C\uB85C,
+    \uBC24\uC774 \uAE4A\uC5B4\uC9C8\uC218\uB85D \uB354 \uC120\uBA85\uD558\uAC8C \uBAA8\uC2B5\uC744
+    \uB4DC\uB7EC\uB0B8\uB2E4."
   field: 3
+  subfield: LateNight
   rarity: 1
   forms: 3
   formNames:
   - "\uAFB8\uBC85\uC774"
   - "\uAFC8\uAFB8\uBBF8"
   - "\uBABD\uD658\uBABD"
+  formIds:
+  - dozy
+  - dreami
+  - reverie
+  formDexNos: 360000003700000038000000
   formSprites:
   - {fileID: 21300000, guid: ef6363eae408a704482d1233c8a82eb1, type: 3}
-  - {fileID: 21300000, guid: ef6363eae408a704482d1233c8a82eb1, type: 3}
-  - {fileID: 21300000, guid: ef6363eae408a704482d1233c8a82eb1, type: 3}
+  - {fileID: 21300000, guid: 400f0f82c9282ee46b60a4c0e57ea2c5, type: 3}
+  - {fileID: 21300000, guid: 7fa3d9b5d8b748248b68adfe4ac4ab28, type: 3}
   bodyColor: {r: 0.7019608, g: 0.6509804, b: 0.8784314, a: 1}
   shinyColor: {r: 0.627451, g: 0.8784314, b: 0.7529412, a: 1}
   rainbow: 0

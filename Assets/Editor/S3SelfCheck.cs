@@ -53,9 +53,9 @@ namespace Deskmon.EditorTools
 
             // 슬롯 가득
             RoamSystem.Toggle(save, db.balance, "mongle", 0, false);
-            save.Creature("kkang").s[0] = 1; RoamSystem.Toggle(save, db.balance, "kkang", 0, false);
+            save.Creature("dewdrop").s[0] = 1; RoamSystem.Toggle(save, db.balance, "dewdrop", 0, false);
             save.Creature("dotori").s[0] = 1; RoamSystem.Toggle(save, db.balance, "dotori", 0, false);
-            save.Creature("bandi").s[0] = 1; RoamSystem.Toggle(save, db.balance, "bandi", 0, false);
+            save.Creature("mossy").s[0] = 1; RoamSystem.Toggle(save, db.balance, "mossy", 0, false);
             save.Creature("mush").s[0] = 1; RoamSystem.Toggle(save, db.balance, "mush", 0, false);
             save.Creature("owl").s[0] = 1;
             Check("슬롯 가득 거부",
@@ -63,9 +63,9 @@ namespace Deskmon.EditorTools
                 $"{save.roam.Count}/5");
 
             // ── 유령 방목 정리 ──
-            save.Creature("kkang").s[0] = 0;
+            save.Creature("dewdrop").s[0] = 0;
             RoamSystem.Validate(save);
-            Check("보유 0 정리", !save.roam.Contains("kkang:0:0"), "");
+            Check("보유 0 정리", !save.roam.Contains("dewdrop:0:0"), "");
 
             // ── 친밀도 ──
             save.berry = 100;
@@ -130,13 +130,13 @@ namespace Deskmon.EditorTools
                 && chain.Creature("mongle").s[2] == 2,
                 $"{evolved}회, 폼 분포 {chain.Creature("mongle").s[0]}/{chain.Creature("mongle").s[1]}/{chain.Creature("mongle").s[2]}");
 
-            // 마지막 개체 진화 시 유령 방목 정리
+            // 마지막 개체 진화 시 유령 방목 정리 (2폼 무조건 진화 라인이면 어느 종이든 된다)
             var ghost = SaveSystem.Fresh(db);
-            ghost.Creature("kkang").s[0] = 1;
-            ghost.SetFriend(SaveData.Key("kkang", 0), 20);
-            RoamSystem.Toggle(ghost, db.balance, "kkang", 0, false);
-            EvolutionSystem.TryEvolve(ghost, db, "kkang", 0, false, day);
-            Check("진화 후 유령 방목 정리", !ghost.roam.Contains("kkang:0:0"), "");
+            ghost.Creature("dewdrop").s[0] = 1;
+            ghost.SetFriend(SaveData.Key("dewdrop", 0), 20);
+            RoamSystem.Toggle(ghost, db.balance, "dewdrop", 0, false);
+            EvolutionSystem.TryEvolve(ghost, db, "dewdrop", 0, false, day);
+            Check("진화 후 유령 방목 정리", !ghost.roam.Contains("dewdrop:0:0"), "");
 
             // 돌려보내기 - 최소 3
             var rel = SaveSystem.Fresh(db);

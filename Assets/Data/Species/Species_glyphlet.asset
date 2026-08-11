@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9188220925321eb49aa5908fdad59c8b, type: 3}
+  m_Name: Species_glyphlet
+  m_EditorClassIdentifier: 
+  id: glyphlet
+  displayName: "\uAE00\uB9AC\uD50C\uB9BF"
+  description: "\uACE0\uB300 \uBB38\uC790\uC758 \uD55C \uD68D\uC774 \uC0B4\uC544\uB09C
+    \uC0DD\uBB3C\uB85C, \uBAB8\uC744 \uC6C0\uC9C1\uC774\uBA74 \uC0C8\uB85C\uC6B4
+    \uAE30\uD638\uCC98\uB7FC \uBCF4\uC778\uB2E4."
+  field: 11
+  subfield: Glyph
+  rarity: 0
+  forms: 2
+  formNames:
+  - "\uAE00\uB9AC\uD50C\uB9BF"
+  - "\uAE00\uB9AC\uD3EC\uB77C"
+  formIds:
+  - glyphlet
+  - glyphora
+  formDexNos: 7700000078000000
+  formSprites:
+  - {fileID: 21300000, guid: c693b55b10ea7bf48bceed60333f5997, type: 3}
+  - {fileID: 21300000, guid: 52a1f50aed49b824eae35e8dde70d4ac, type: 3}
+  bodyColor: {r: 0.6666671, g: 0.59999955, b: 0.46666706, a: 1}
+  shinyColor: {r: 0.46666706, g: 0.5333346, b: 0.6666671, a: 1}
+  rainbow: 0
+  hop: 0
+  nightOnly: 0
+  gate: 0
+  faction: 0
+  eventOnly: 0
+  evolveCondition: 0
+  pattern: 0

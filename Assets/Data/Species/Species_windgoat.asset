@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9188220925321eb49aa5908fdad59c8b, type: 3}
+  m_Name: Species_windgoat
+  m_EditorClassIdentifier: 
+  id: windgoat
+  displayName: "\uBC14\uB78C\uC5FC\uC18C"
+  description: "\uBC14\uB78C \uC18C\uC6A9\uB3CC\uC774 \uBFD4\uC744 \uAC00\uC9C4 \uC0DD\uBB3C\uB85C,
+    \uB192\uC740 \uB2A5\uC120\uC5D0\uC11C \uBC14\uB78C\uACB0\uC744 \uD0C0\uACE0 \uB6F4\uB2E4."
+  field: 7
+  subfield: Wind
+  rarity: 1
+  forms: 2
+  formNames:
+  - "\uBC14\uB78C\uC5FC\uC18C"
+  - "\uB3CC\uD48D\uBFD4"
+  formIds:
+  - windgoat
+  - galehorn
+  formDexNos: 5600000057000000
+  formSprites:
+  - {fileID: 21300000, guid: 9127e124753b2124b89f6e833b19f30c, type: 3}
+  - {fileID: 21300000, guid: a039543581a05794183f1b1e46a0a614, type: 3}
+  bodyColor: {r: 0.8666661, g: 0.7999996, b: 0.7333335, a: 1}
+  shinyColor: {r: 0.7333335, g: 0.83199984, b: 0.8666661, a: 1}
+  rainbow: 0
+  hop: 0
+  nightOnly: 0
+  gate: 0
+  faction: 0
+  eventOnly: 0
+  evolveCondition: 0
+  pattern: 1

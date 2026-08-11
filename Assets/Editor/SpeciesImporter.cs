@@ -7,16 +7,21 @@ using Deskmon.Core;
 namespace Deskmon.EditorTools
 {
     /// <summary>
-    /// data.js의 SPECIES/FIELDS를 ScriptableObject로 만든다 (포팅계획 §5 "데이터 이전").
+    /// 151 원장(기획서 §17)을 SpeciesData/FieldData 에셋으로 만든다.
     ///
-    /// 왜 손으로 안 만드는가: 12종 x 20여 필드를 인스펙터로 옮기면 오타가 조용히 섞이고,
-    /// 원본 수치가 바뀌었을 때 무엇이 달라졌는지 대조할 방법이 없다. 표를 코드에 두면
-    /// 원본과 diff로 맞춰볼 수 있다.
+    /// v1은 data.js의 12종 표를 코드에 옮겨 적는 방식이었다. 151종부터는 기획서 §17
+    /// 표가 정본이므로 DexLedger로 문서를 직접 파싱한다 — 문서 수정만으로 게임 데이터가
+    /// 따라오고, 코드와 문서가 두 벌로 갈라지지 않는다.
+    ///
+    /// 원장에 없는 게임플레이 값은 두 층으로 채운다:
+    ///   1) 휴리스틱 — 희귀도->행동패턴, 서브필드->출몰 게이트, 스프라이트->대표색.
+    ///   2) Overrides — data.js에서 손튜닝돼 넘어온 초기 종들의 색/게이트/진영/진화조건.
+    ///      세이브 호환 때문에 id가 원장과 다른 종(mush, owl)의 별칭도 여기서 흡수한다.
     ///
     /// 재실행해도 안전하다 - 기존 에셋이 있으면 값만 덮어쓰고 GUID는 유지하므로
     /// 씬/DB의 참조가 끊기지 않는다.
     ///
-    /// 사용: 메뉴 [Deskmon/데이터 임포트 (data.js -> 에셋)]
+    /// 사용: 메뉴 [Deskmon/데이터 임포트 (151 원장 -> 에셋)]
     /// </summary>
     public static class SpeciesImporter
     {
@@ -24,95 +29,57 @@ namespace Deskmon.EditorTools
         const string SPECIES_DIR = DATA_DIR + "/Species";
         const string FIELD_DIR = DATA_DIR + "/Fields";
         const string SPRITE_DIR = "Assets/Sprites";
+        const string GEN_DIR = SPRITE_DIR + "/MonsterGenV2_64";
 
-        // data.js SPECIES 표를 그대로 옮긴 것. 순서도 원본과 같게 유지한다.
-        struct Row
+        /// <summary>
+        /// 원장 기준 id -> 세이브가 쓰는 런타임 id.
+        /// 세이브는 종 id 문자열을 키로 쓰므로(<see cref="SpeciesData.id"/>) 초기 12종
+        /// 시절의 id를 바꿀 수 없다. 원장 재편에서 이름이 갈린 라인만 여기 적는다.
+        /// </summary>
+        static readonly Dictionary<string, string> RuntimeAlias = new Dictionary<string, string>
         {
-            public string id, name, desc;
-            public Field field;
-            public Rarity rarity;
-            public int forms;
+            { "mushjong", "mush" },
+            { "owloon", "owl" },
+        };
+
+        /// <summary>data.js에서 손튜닝돼 넘어온 값. 키는 런타임 id.</summary>
+        struct Override
+        {
             public string color, shiny;
-            public string[] evo;
-            public bool hop, night, rainbow, eventOnly;
+            public bool night, rainbow;
             public SpawnGate gate;
             public Faction faction;
             public EvolveCondition evolve;
-            public BehaviorPattern pattern;
+            public BehaviorPattern? pattern;
         }
 
-        static readonly Row[] Rows =
+        static readonly Dictionary<string, Override> Overrides = new Dictionary<string, Override>
         {
-            new Row { id="mongle", name="몽글이", field=Field.Grass, rarity=Rarity.Common, forms=3,
-                      color="#8fd977", shiny="#f5a3d0", evo=new[]{"몽글이","잎몽이","꽃몽이"},
-                      pattern=BehaviorPattern.Calm,
-                      desc="햇살을 좋아하는 새싹 젤리. 기분이 좋으면 머리 위 잎이 살랑거린다." },
-
-            new Row { id="kkang", name="깡총이", field=Field.Grass, rarity=Rarity.Common, forms=2,
-                      color="#ffd35c", shiny="#7de8c3", evo=new[]{"깡총이","왕깡총"}, hop=true,
-                      pattern=BehaviorPattern.Calm,
-                      desc="가만히 있질 못하는 점프꾼. 귀가 안테나처럼 쫑긋거린다." },
-
-            new Row { id="bandi", name="반디", field=Field.Grass, rarity=Rarity.Rare, forms=1,
-                      color="#7dd6ff", shiny="#ffb0e0", evo=new[]{"반디"}, night=true,
-                      pattern=BehaviorPattern.Shy,
-                      desc="밤에만 반짝이는 수줍은 빛의 정령. 진화하지 않는 대신 태생이 특별하다." },
-
-            new Row { id="dotori", name="도토리", field=Field.Forest, rarity=Rarity.Common, forms=3,
-                      color="#b98d5e", shiny="#cfd6e0", evo=new[]{"도토리","도톨이","참나무지기"},
-                      pattern=BehaviorPattern.Calm,
-                      desc="도토리 모자를 아끼는 숲의 살림꾼. 겨울을 대비해 뭔가를 자꾸 모은다." },
-
-            new Row { id="mush", name="버섯쫑", field=Field.Forest, rarity=Rarity.Rare, forms=2,
-                      color="#ff8d7b", shiny="#7da9ff", evo=new[]{"버섯쫑","광대쫑"},
-                      evolve=EvolveCondition.Fed,
-                      pattern=BehaviorPattern.Shy,
-                      desc="축축한 그늘에서 자라는 장난꾸러기. 갓을 흔들면 포자가 날린다." },
-
-            new Row { id="owl", name="부엉", field=Field.Forest, rarity=Rarity.Epic, forms=2,
-                      color="#a98bff", shiny="#ff9d6b", evo=new[]{"부엉","현자부엉"},
-                      night=true, evolve=EvolveCondition.Night,
-                      pattern=BehaviorPattern.Blink,
-                      desc="숲의 밤을 지키는 관찰자. 밤이 깊어야만 다음 모습을 보여준다." },
-
-            new Row { id="lumi", name="루미", field=Field.Special, rarity=Rarity.Legendary, forms=1,
-                      color="#ffffff", shiny="#3d3b52", evo=new[]{"루미"}, rainbow=true,
-                      pattern=BehaviorPattern.Drift,
-                      desc="아주 드물게 나타나는 빛의 젤리. 붙잡을 수 없고, 오직 원을 그려 맞이해야 한다." },
-
-            // ── M4 신규 ──
-            new Row { id="dewdrop", name="이슬방울", field=Field.Lake, rarity=Rarity.Common, forms=2,
-                      color="#8fd6e8", shiny="#ffd6a0", evo=new[]{"이슬방울","이슬왕관"},
-                      faction=Faction.Dew,
-                      pattern=BehaviorPattern.Shy,
-                      desc="풀잎 끝에 맺히는 맑은 물방울. 이슬 팀의 상징이다." },
-
-            new Row { id="mossy", name="이끼돌", field=Field.Lake, rarity=Rarity.Common, forms=2,
-                      color="#9cc26b", shiny="#c89cff", evo=new[]{"이끼돌","이끼거인"},
-                      faction=Faction.Moss,
-                      pattern=BehaviorPattern.Calm,
-                      desc="오래된 바위에 이끼가 자라 깨어난 정령. 이끼 팀의 상징이다." },
-
-            new Row { id="origami", name="종이접기", field=Field.Office, rarity=Rarity.Rare, forms=1,
-                      color="#f0f0f0", shiny="#ffe08a", evo=new[]{"종이접기"},
-                      gate=SpawnGate.WeekdayWork,
-                      pattern=BehaviorPattern.Calm,
-                      desc="평일 낮, 일하는 책상에서만 접혀 나타나는 종이 생물." },
-
-            new Row { id="dozy", name="꾸벅이", field=Field.Office, rarity=Rarity.Rare, forms=3,
-                      color="#b3a6e0", shiny="#a0e0c0", evo=new[]{"꾸벅이","꿈꾸미","몽환몽"},
-                      gate=SpawnGate.LateNight,
-                      pattern=BehaviorPattern.Calm,
-                      desc="깊은 밤에만 스르륵 나타나는 잠의 몬스터." },
-
-            new Row { id="chrono", name="크로노", field=Field.Event, rarity=Rarity.Legendary, forms=1,
-                      color="#ffffff", shiny="#3d3b52", evo=new[]{"크로노"},
-                      rainbow=true, eventOnly=true,
-                      pattern=BehaviorPattern.Drift,
-                      desc="매주 금요일 밤, 모두의 화면에 동시에 나타나는 시간의 전설." },
+            { "mongle",  new Override { color="#8fd977", shiny="#f5a3d0" } },
+            { "dotori",  new Override { color="#b98d5e", shiny="#cfd6e0" } },
+            { "mush",    new Override { color="#ff8d7b", shiny="#7da9ff", evolve=EvolveCondition.Fed } },
+            { "owl",     new Override { color="#a98bff", shiny="#ff9d6b", night=true, evolve=EvolveCondition.Night,
+                                        pattern=BehaviorPattern.Blink } },
+            { "lumi",    new Override { color="#ffffff", shiny="#3d3b52", rainbow=true } },
+            { "dewdrop", new Override { color="#8fd6e8", shiny="#ffd6a0", faction=Faction.Dew,
+                                        pattern=BehaviorPattern.Shy } },
+            { "mossy",   new Override { color="#9cc26b", shiny="#c89cff", faction=Faction.Moss,
+                                        pattern=BehaviorPattern.Calm } },
+            { "origami", new Override { color="#f0f0f0", shiny="#ffe08a", gate=SpawnGate.WeekdayWork,
+                                        pattern=BehaviorPattern.Calm } },
+            { "dozy",    new Override { color="#b3a6e0", shiny="#a0e0c0", gate=SpawnGate.LateNight,
+                                        pattern=BehaviorPattern.Calm } },
+            { "chrono",  new Override { color="#ffffff", shiny="#3d3b52", rainbow=true } },
         };
 
-        // data.js FIELDS
+        /// <summary>
+        /// 도감에서 제외돼 원장에 없는 구 종. 에셋과 플레이스홀더 도트를 정리한다.
+        /// 구 세이브에 잡힌 개체는 db 조회가 null을 돌려주는 경로로 조용히 무시된다.
+        /// </summary>
+        static readonly string[] Retired = { "kkang", "bandi" };
+
+        // data.js FIELDS + 151 원장 확장 필드.
+        // 해금 비용은 기존 곡선(x3 근사)을 이어 붙인 가안 - 밸런스 실측 전까지의 사다리다.
         struct FieldRow
         {
             public Field id; public string name; public int cost;
@@ -121,21 +88,41 @@ namespace Deskmon.EditorTools
 
         static readonly FieldRow[] FieldRows =
         {
-            new FieldRow { id=Field.Grass,  name="초원", cost=0,
+            new FieldRow { id=Field.Grass,    name="초원", cost=0,
                            dayTop="#e4f5d6", dayBottom="#bce69e", nightTop="#2b4152", nightBottom="#182b3c" },
-            new FieldRow { id=Field.Forest, name="숲",   cost=200,
+            new FieldRow { id=Field.Forest,   name="숲",   cost=200,
                            dayTop="#d2ebc6", dayBottom="#8fc07c", nightTop="#223447", nightBottom="#101f2c" },
-            new FieldRow { id=Field.Lake,   name="호수", cost=600,
+            new FieldRow { id=Field.Lake,     name="호수", cost=600,
                            dayTop="#cfeaf0", dayBottom="#8fcdd8", nightTop="#1c3540", nightBottom="#0e2029" },
-            new FieldRow { id=Field.Office, name="사무", cost=1800,
+            new FieldRow { id=Field.Office,   name="사무", cost=1800,
                            dayTop="#ece8e0", dayBottom="#c3bcae", nightTop="#2a2a33", nightBottom="#16161c" },
+            new FieldRow { id=Field.Cave,     name="동굴", cost=5000,
+                           dayTop="#cfc8d8", dayBottom="#9f93b0", nightTop="#241e33", nightBottom="#120f1f" },
+            new FieldRow { id=Field.Mountain, name="산",   cost=14000,
+                           dayTop="#e8f2f8", dayBottom="#b8d0dc", nightTop="#263a4d", nightBottom="#14222f" },
+            new FieldRow { id=Field.Coast,    name="해안", cost=40000,
+                           dayTop="#cfeef2", dayBottom="#eeddb2", nightTop="#1c3140", nightBottom="#241f33" },
+            new FieldRow { id=Field.Sky,      name="하늘", cost=110000,
+                           dayTop="#d8ecfb", dayBottom="#aacdf0", nightTop="#202c4d", nightBottom="#101830" },
+            new FieldRow { id=Field.City,     name="도시", cost=300000,
+                           dayTop="#e6e2ea", dayBottom="#b8b2c2", nightTop="#2b2340", nightBottom="#171129" },
+            new FieldRow { id=Field.Ruins,    name="유적", cost=800000,
+                           dayTop="#eee6d2", dayBottom="#c2b491", nightTop="#2e2a3a", nightBottom="#181524" },
+            new FieldRow { id=Field.Machine,  name="기계", cost=2000000,
+                           dayTop="#e2e6ea", dayBottom="#aab4bd", nightTop="#232833", nightBottom="#12161e" },
+            new FieldRow { id=Field.Dream,    name="꿈",   cost=5000000,
+                           dayTop="#ece2f6", dayBottom="#c3b0e0", nightTop="#2c2347", nightBottom="#160f2b" },
+            new FieldRow { id=Field.Weather,  name="날씨", cost=12000000,
+                           dayTop="#dfe9f0", dayBottom="#9fb8c8", nightTop="#26303f", nightBottom="#131a26" },
         };
 
-        [MenuItem("Deskmon/데이터 임포트 (data.js -> 에셋)")]
+        [MenuItem("Deskmon/데이터 임포트 (151 원장 -> 에셋)")]
         public static void Import()
         {
             Directory.CreateDirectory(SPECIES_DIR);
             Directory.CreateDirectory(FIELD_DIR);
+
+            var lines = DexLedger.ParseLines();
 
             var db = LoadOrCreate<DeskmonDatabase>($"{DATA_DIR}/DeskmonDB.asset");
             db.balance = LoadOrCreate<BalanceData>($"{DATA_DIR}/Balance.asset");
@@ -156,41 +143,94 @@ namespace Deskmon.EditorTools
                 db.fields.Add(fd);
             }
 
-            // ── 종 ──
-            db.species.Clear();
-            foreach (var r in Rows)
+            // ── 도감 제외 종 정리 ──
+            foreach (var id in Retired)
             {
-                var sp = LoadOrCreate<SpeciesData>($"{SPECIES_DIR}/Species_{r.id}.asset");
-                sp.id = r.id;
-                sp.displayName = r.name;
-                sp.description = r.desc;
-                sp.field = r.field;
-                sp.rarity = r.rarity;
-                sp.forms = r.forms;
-                sp.formNames = r.evo;
-                sp.bodyColor = Hex(r.color);
-                sp.shinyColor = Hex(r.shiny);
-                sp.rainbow = r.rainbow;
-                sp.hop = r.hop;
-                sp.nightOnly = r.night;
-                sp.gate = r.gate;
-                sp.faction = r.faction;
-                sp.eventOnly = r.eventOnly;
-                sp.evolveCondition = r.evolve;
-                sp.pattern = r.pattern;
+                AssetDatabase.DeleteAsset($"{SPECIES_DIR}/Species_{id}.asset");
+                AssetDatabase.DeleteAsset($"{SPRITE_DIR}/{id}.png");
+            }
+
+            // ── 종 (원장 라인 순서 = 도감 순서) ──
+            db.species.Clear();
+            int copied = 0;
+
+            foreach (var line in lines)
+            {
+                var baseE = line.Base;
+                string rid = RuntimeAlias.TryGetValue(baseE.id, out var alias) ? alias : baseE.id;
+
+                copied += SyncLineSprites(line, rid);
+
+                var sp = LoadOrCreate<SpeciesData>($"{SPECIES_DIR}/Species_{rid}.asset");
+                sp.id = rid;
+                sp.displayName = baseE.koName;
+                sp.description = baseE.desc;
+                sp.field = baseE.field;
+                sp.subfield = baseE.subfield;
+                sp.rarity = baseE.rarity;
+                sp.forms = line.forms.Count;
+
+                sp.formNames = new string[line.forms.Count];
+                sp.formIds = new string[line.forms.Count];
+                sp.formDexNos = new int[line.forms.Count];
+                for (int i = 0; i < line.forms.Count; i++)
+                {
+                    sp.formNames[i] = line.forms[i].koName;
+                    sp.formIds[i] = line.forms[i].id;
+                    sp.formDexNos[i] = line.forms[i].no;
+                }
+
+                // ── 게임플레이 값: 휴리스틱 + 손튜닝 오버라이드 ──
+                Overrides.TryGetValue(rid, out var ov);
+                bool hasOv = Overrides.ContainsKey(rid);
+
+                // hop(점프 이동)은 깡총이 전용이었다 - 도감 제외로 현재 0종. 점프 라인이
+                // 다시 생기면 Override에 되살린다.
+                sp.hop = false;
+                sp.rainbow = ov.rainbow;
+                sp.faction = ov.faction;
+                sp.evolveCondition = ov.evolve;
+
+                // 밤 전용: 밤숲 서브필드 또는 손튜닝. 심야 게이트: 사무/심야 서브필드.
+                sp.nightOnly = ov.night || baseE.subfield == "Nightwood";
+                sp.gate = ov.gate != SpawnGate.None ? ov.gate
+                        : baseE.subfield == "LateNight" ? SpawnGate.LateNight
+                        : SpawnGate.None;
+
+                // 이벤트 필드는 일반 출몰 풀에서 제외 (크로노·소원지).
+                sp.eventOnly = baseE.field == Field.Event;
+
+                // 행동 패턴 = 접근 난이도. 희귀할수록 까다롭게, 전설은 부유(Drift).
+                sp.pattern = ov.pattern ?? baseE.rarity switch
+                {
+                    Rarity.Common => BehaviorPattern.Calm,
+                    Rarity.Rare => BehaviorPattern.Shy,
+                    Rarity.Epic => BehaviorPattern.Blink,
+                    _ => BehaviorPattern.Drift,
+                };
+
+                // 대표색: 손튜닝이 없으면 실제 도트에서 추출한다. 팔레트 스왑(_BaseColor)의
+                // 기준색이므로 스프라이트의 실제 몸색과 일치해야 샤이니가 제대로 물든다.
+                if (hasOv && !string.IsNullOrEmpty(ov.color))
+                {
+                    sp.bodyColor = Hex(ov.color);
+                    sp.shinyColor = Hex(ov.shiny);
+                }
+                else
+                {
+                    sp.bodyColor = DominantColor($"{SPRITE_DIR}/{rid}.png", sp.bodyColor);
+                    sp.shinyColor = DeriveShiny(rid, sp.bodyColor);
+                }
 
                 // 폼별 스프라이트 연결. 파일명 규칙:
-                //   <id>.png         = 기본형 (스테이지 0)
-                //   <id>_stage2.png  = 1차 진화형
-                //   <id>_stage3.png  = 2차 진화형
-                // 폼별 파일이 없으면 기본형을 재사용한다 - 도트가 폼별로 나오기 전까지의 상태.
-                if (sp.formSprites == null || sp.formSprites.Length != r.forms)
-                    sp.formSprites = new Sprite[r.forms];
+                //   <id>.png / <id>_stage2.png / <id>_stage3.png
+                if (sp.formSprites == null || sp.formSprites.Length != sp.forms)
+                    sp.formSprites = new Sprite[sp.forms];
 
-                var baseSprite = LoadFormSprite(r.id, 0);
-                for (int i = 0; i < r.forms; i++)
+                var baseSprite = LoadFormSprite(rid, 0);
+                for (int i = 0; i < sp.forms; i++)
                 {
-                    var stageSprite = i == 0 ? baseSprite : LoadFormSprite(r.id, i);
+                    var stageSprite = i == 0 ? baseSprite : LoadFormSprite(rid, i);
                     if (stageSprite != null) sp.formSprites[i] = stageSprite;
                     else if (sp.formSprites[i] == null) sp.formSprites[i] = baseSprite;
                 }
@@ -204,7 +244,114 @@ namespace Deskmon.EditorTools
             AssetDatabase.SaveAssets();
             AssetDatabase.Refresh();
 
-            Debug.Log($"[Deskmon] 데이터 임포트 완료 - 종 {Rows.Length} · 필드 {FieldRows.Length} -> {DATA_DIR}");
+            Debug.Log($"[Deskmon] 데이터 임포트 완료 - 라인 {db.species.Count} (도감 {CountForms(lines)}) · " +
+                      $"필드 {FieldRows.Length} · 도트 복사 {copied} -> {DATA_DIR}");
+        }
+
+        static int CountForms(List<DexLedger.Line> lines)
+        {
+            int n = 0;
+            foreach (var l in lines) n += l.forms.Count;
+            return n;
+        }
+
+        /// <summary>
+        /// 생성 배치(MonsterGenV2_64)의 도트를 런타임 이름으로 복사한다.
+        /// 내용이 같으면 건너뛰어 불필요한 재임포트를 막는다. 반환값은 복사한 파일 수.
+        /// </summary>
+        static int SyncLineSprites(DexLedger.Line line, string rid)
+        {
+            int copied = 0;
+            for (int i = 0; i < line.forms.Count; i++)
+            {
+                var e = line.forms[i];
+                string src = $"{GEN_DIR}/{e.no:000}_{e.id}_64.png";
+                string dst = i == 0 ? $"{SPRITE_DIR}/{rid}.png" : $"{SPRITE_DIR}/{rid}_stage{i + 1}.png";
+
+                if (!File.Exists(src))
+                {
+                    Debug.LogWarning($"[Deskmon] 생성 도트 없음: {src} - {dst}는 기존 파일/플레이스홀더 유지");
+                    continue;
+                }
+
+                var srcBytes = File.ReadAllBytes(src);
+                if (File.Exists(dst))
+                {
+                    var dstBytes = File.ReadAllBytes(dst);
+                    if (BytesEqual(srcBytes, dstBytes)) continue;
+                }
+
+                File.WriteAllBytes(dst, srcBytes);
+                AssetDatabase.ImportAsset(dst);
+                copied++;
+            }
+            return copied;
+        }
+
+        static bool BytesEqual(byte[] a, byte[] b)
+        {
+            if (a.Length != b.Length) return false;
+            for (int i = 0; i < a.Length; i++)
+                if (a[i] != b[i]) return false;
+            return true;
+        }
+
+        /// <summary>
+        /// 도트에서 대표(최빈) 몸색을 뽑는다. 외곽선(어두운 픽셀)은 제외한다.
+        ///
+        /// 임포터 설정과 무관하게 읽기 위해 png 바이트를 직접 디코드한다
+        /// (에셋 텍스처는 Read/Write 비활성이라 GetPixels가 막힌다).
+        /// </summary>
+        static Color DominantColor(string path, Color fallback)
+        {
+            if (!File.Exists(path)) return fallback;
+
+            var tex = new Texture2D(2, 2, TextureFormat.RGBA32, false);
+            try
+            {
+                if (!tex.LoadImage(File.ReadAllBytes(path))) return fallback;
+
+                var buckets = new Dictionary<int, (int count, float r, float g, float b)>();
+                foreach (var p in tex.GetPixels())
+                {
+                    if (p.a < 0.5f) continue;
+                    if (Mathf.Max(p.r, Mathf.Max(p.g, p.b)) < 0.25f) continue; // 외곽선/짙은 그림자
+
+                    int key = ((int)(p.r * 15f) << 8) | ((int)(p.g * 15f) << 4) | (int)(p.b * 15f);
+                    buckets.TryGetValue(key, out var acc);
+                    buckets[key] = (acc.count + 1, acc.r + p.r, acc.g + p.g, acc.b + p.b);
+                }
+
+                int best = -1; (int count, float r, float g, float b) bestAcc = default;
+                foreach (var kv in buckets)
+                    if (kv.Value.count > bestAcc.count) { best = kv.Key; bestAcc = kv.Value; }
+
+                if (best < 0) return fallback;
+                return new Color(bestAcc.r / bestAcc.count, bestAcc.g / bestAcc.count, bestAcc.b / bestAcc.count);
+            }
+            finally
+            {
+                Object.DestroyImmediate(tex);
+            }
+        }
+
+        /// <summary>
+        /// 샤이니색 자동 생성 - 몸색의 색상(H)을 종별 고정 오프셋만큼 돌린다.
+        /// id 해시 기반이라 재임포트해도 같은 색이 나온다. 무채색 몸(종이·돌)은
+        /// 채도를 끌어올려 스왑이 눈에 보이게 한다.
+        /// </summary>
+        static Color DeriveShiny(string id, Color body)
+        {
+            Color.RGBToHSV(body, out float h, out float s, out float v);
+
+            uint hash = 5381;
+            foreach (char c in id) hash = hash * 33 + c;
+
+            float offset = 0.28f + (hash % 40u) / 100f;   // 0.28 ~ 0.67 회전
+            h = (h + offset) % 1f;
+            if (s < 0.15f) s = 0.45f;
+            v = Mathf.Clamp(v, 0.35f, 0.95f);
+            return Color.HSVToRGB(h, s, v);
         }
 
         /// <summary>
@@ -220,9 +367,12 @@ namespace Deskmon.EditorTools
                 ? $"{SPRITE_DIR}/{id}.png"
                 : $"{SPRITE_DIR}/{id}_stage{stage + 1}.png";
 
-            var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(path);
-            if (sprite != null) ApplyPixelImportSettings(path);
-            return sprite;
+            // 설정 강제를 로드보다 먼저 한다. 갓 복사된 png는 기본 설정(텍스처 타입
+            // Default)으로 임포트되는데, 그 상태로는 LoadAssetAtPath<Sprite>가 null을
+            // 돌려줘 "로드 성공 시에만 설정"이 영원히 안 돈다 (실제로 신규 70라인이
+            // 전부 미연결로 나왔다).
+            if (File.Exists(path)) ApplyPixelImportSettings(path);
+            return AssetDatabase.LoadAssetAtPath<Sprite>(path);
         }
 
         /// <summary>포팅계획 §3.4의 픽셀아트 파이프라인. PlaceholderSpriteGen과 같은 값.</summary>

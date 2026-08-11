@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9188220925321eb49aa5908fdad59c8b, type: 3}
+  m_Name: Species_crystail
+  m_EditorClassIdentifier: 
+  id: crystail
+  displayName: "\uC218\uC815\uAF2C\uB9AC"
+  description: "\uAF2C\uB9AC \uB05D \uC218\uC815\uC73C\uB85C \uBE5B\uC744 \uBAA8\uC73C\uB294
+    \uC0DD\uBB3C\uB85C, \uC5B4\uB460 \uC18D\uC5D0\uC11C \uAF2C\uB9AC\uB9CC \uBC18\uC9DD\uC778\uB2E4."
+  field: 6
+  subfield: Crystal
+  rarity: 1
+  forms: 3
+  formNames:
+  - "\uC218\uC815\uAF2C\uB9AC"
+  - "\uC218\uC815\uB9AC\uC2A4\uD06C"
+  - "\uD504\uB9AC\uC998\uD14C\uC77C"
+  formIds:
+  - crystail
+  - crystalisk
+  - prismtail
+  formDexNos: 48000000490000004a000000
+  formSprites:
+  - {fileID: 21300000, guid: 2e81963bd58dc3c41ab807fee1d1d68e, type: 3}
+  - {fileID: 21300000, guid: e3377a5160cfab04cb53818eabe55067, type: 3}
+  - {fileID: 21300000, guid: 5d93a543eb1f6c545934a6cfb4e3f5e5, type: 3}
+  bodyColor: {r: 0.33333358, g: 0.73333347, b: 0.66666716, a: 1}
+  shinyColor: {r: 0.730667, g: 0.3333336, b: 0.73333347, a: 1}
+  rainbow: 0
+  hop: 0
+  nightOnly: 0
+  gate: 0
+  faction: 0
+  eventOnly: 0
+  evolveCondition: 0
+  pattern: 1

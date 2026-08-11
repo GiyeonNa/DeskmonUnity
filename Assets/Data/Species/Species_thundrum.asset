@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9188220925321eb49aa5908fdad59c8b, type: 3}
+  m_Name: Species_thundrum
+  m_EditorClassIdentifier: 
+  id: thundrum
+  displayName: "\uCC9C\uB465\uB465"
+  description: "\uBD81\uCC98\uB7FC \uB465\uADFC \uAD6C\uB984 \uC0DD\uBB3C\uB85C,
+    \uBAB8\uC744 \uB450\uB4DC\uB9AC\uBA74 \uC791\uC740 \uCC9C\uB465\uC18C\uB9AC\uAC00
+    \uB09C\uB2E4."
+  field: 14
+  subfield: Thunder
+  rarity: 1
+  forms: 3
+  formNames:
+  - "\uCC9C\uB465\uB465"
+  - "\uD3ED\uD48D\uB465"
+  - "\uD15C\uD398\uC2A4\uD2B8\uB7FC"
+  formIds:
+  - thundrum
+  - stormdrum
+  - tempestrum
+  formDexNos: 8e0000008f00000090000000
+  formSprites:
+  - {fileID: 21300000, guid: 5f5322d2693f2774b8325b07ab511b60, type: 3}
+  - {fileID: 21300000, guid: 608c7099839753a459794f299cf350bb, type: 3}
+  - {fileID: 21300000, guid: b0bbe116dbc8dce478501513fc172bce, type: 3}
+  bodyColor: {r: 0.7333357, g: 0.7333357, b: 0.7333357, a: 1}
+  shinyColor: {r: 0.40333462, g: 0.6145353, b: 0.7333357, a: 1}
+  rainbow: 0
+  hop: 0
+  nightOnly: 0
+  gate: 0
+  faction: 0
+  eventOnly: 0
+  evolveCondition: 0
+  pattern: 1

@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9188220925321eb49aa5908fdad59c8b, type: 3}
+  m_Name: Species_wishpaper
+  m_EditorClassIdentifier: 
+  id: wishpaper
+  displayName: "\uC18C\uC6D0\uC9C0"
+  description: "\uC18C\uC6D0 \uC885\uC774\uAC00 \uBCC4 \uBAA8\uC591\uC73C\uB85C \uC811\uD78C
+    \uD658\uC0C1 \uC0DD\uBB3C\uB85C, \uC801\uD78C \uC18C\uC6D0\uC774 \uC0AC\uB77C\uC9C8
+    \uB54C \uBE5B\uC744 \uB0B8\uB2E4."
+  field: 5
+  subfield: Wish
+  rarity: 3
+  forms: 1
+  formNames:
+  - "\uC18C\uC6D0\uC9C0"
+  formIds:
+  - wishpaper
+  formDexNos: 97000000
+  formSprites:
+  - {fileID: 21300000, guid: 53abde6c19073b841863ee0b99a72ccc, type: 3}
+  bodyColor: {r: 1, g: 1, b: 0.86666745, a: 1}
+  shinyColor: {r: 0.5225, g: 0.95, b: 0.81319994, a: 1}
+  rainbow: 0
+  hop: 0
+  nightOnly: 0
+  gate: 0
+  faction: 0
+  eventOnly: 1
+  evolveCondition: 0
+  pattern: 3

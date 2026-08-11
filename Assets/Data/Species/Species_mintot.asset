@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9188220925321eb49aa5908fdad59c8b, type: 3}
+  m_Name: Species_mintot
+  m_EditorClassIdentifier: 
+  id: mintot
+  displayName: "\uBBFC\uD1A0\uD2B8"
+  description: "\uBBFC\uD2B8 \uD5A5\uC774 \uB098\uB294 \uC78E \uBAA9\uB3C4\uB9AC\uB97C
+    \uB450\uB978 \uC0DD\uBB3C\uB85C, \uC8FC\uBCC0 \uACF5\uAE30\uB97C \uC0C1\uCF8C\uD558\uAC8C
+    \uB9CC\uB4E0\uB2E4."
+  field: 0
+  subfield: Herb
+  rarity: 0
+  forms: 2
+  formNames:
+  - "\uBBFC\uD1A0\uD2B8"
+  - "\uBBFC\uD14C\uC77C"
+  formIds:
+  - mintot
+  - mintail
+  formDexNos: 0f00000010000000
+  formSprites:
+  - {fileID: 21300000, guid: b59129e450efc4044adbbf12a9310bf7, type: 3}
+  - {fileID: 21300000, guid: d7f97f6b48f1796489b32b69a6c6b48e, type: 3}
+  bodyColor: {r: 0.7333324, g: 0.86666703, b: 0.33333322, a: 1}
+  shinyColor: {r: 0.33333325, g: 0.86666703, b: 0.82933486, a: 1}
+  rainbow: 0
+  hop: 0
+  nightOnly: 0
+  gate: 0
+  faction: 0
+  eventOnly: 0
+  evolveCondition: 0
+  pattern: 0

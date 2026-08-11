@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9188220925321eb49aa5908fdad59c8b, type: 3}
+  m_Name: Species_railrat
+  m_EditorClassIdentifier: 
+  id: railrat
+  displayName: "\uB808\uC77C\uB7AB"
+  description: "\uC120\uB85C\uCC98\uB7FC \uAE34 \uAF2C\uB9AC\uB97C \uAC00\uC9C4 \uC0DD\uBB3C\uB85C,
+    \uC77C\uC815\uD55C \uBC15\uC790\uB85C \uBE60\uB974\uAC8C \uB2EC\uB9B0\uB2E4."
+  field: 10
+  subfield: Subway
+  rarity: 0
+  forms: 3
+  formNames:
+  - "\uB808\uC77C\uB7AB"
+  - "\uB808\uC77C\uC2A4\uCEE4"
+  - "\uBA54\uD2B8\uB85C\uB7AB"
+  formIds:
+  - railrat
+  - railskur
+  - metrorat
+  formDexNos: 710000007200000073000000
+  formSprites:
+  - {fileID: 21300000, guid: 3d89289fb20626441902f1a5a052370b, type: 3}
+  - {fileID: 21300000, guid: 8d5786c858fb947409207b6813e03045, type: 3}
+  - {fileID: 21300000, guid: fb627f5abf3f8294f80aeddeac3b7cd5, type: 3}
+  bodyColor: {r: 0.466667, g: 0.466667, b: 0.466667, a: 1}
+  shinyColor: {r: 0.25666684, g: 0.3910669, b: 0.466667, a: 1}
+  rainbow: 0
+  hop: 0
+  nightOnly: 0
+  gate: 0
+  faction: 0
+  eventOnly: 0
+  evolveCondition: 0
+  pattern: 0

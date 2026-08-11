@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9188220925321eb49aa5908fdad59c8b, type: 3}
+  m_Name: Species_avalamb
+  m_EditorClassIdentifier: 
+  id: avalamb
+  displayName: "\uB208\uC0AC\uD0DC\uC591"
+  description: "\uB208\uC0AC\uD0DC\uCC98\uB7FC \uBD80\uD47C \uD138\uC744 \uC9C0\uB2CC
+    \uC0DD\uBB3C\uB85C, \uAD74\uB7EC\uAC00\uBA74 \uC791\uC740 \uB208\uAD6C\uB984\uC774
+    \uB4A4\uB530\uB978\uB2E4."
+  field: 7
+  subfield: Snow
+  rarity: 2
+  forms: 1
+  formNames:
+  - "\uB208\uC0AC\uD0DC\uC591"
+  formIds:
+  - avalamb
+  formDexNos: 59000000
+  formSprites:
+  - {fileID: 21300000, guid: 04cd9a4c37b80624bb41f09e90b948d8, type: 3}
+  bodyColor: {r: 1, g: 1, b: 1, a: 1}
+  shinyColor: {r: 0.5225, g: 0.8730501, b: 0.95, a: 1}
+  rainbow: 0
+  hop: 0
+  nightOnly: 0
+  gate: 0
+  faction: 0
+  eventOnly: 0
+  evolveCondition: 0
+  pattern: 2

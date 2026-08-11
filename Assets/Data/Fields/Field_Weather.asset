@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a21e1dcee10800e4098b428fb5a8b297, type: 3}
+  m_Name: Field_Weather
+  m_EditorClassIdentifier: 
+  id: 14
+  displayName: "\uB0A0\uC528"
+  unlockCost: 12000000
+  dayTop: {r: 0.8745098, g: 0.9137255, b: 0.9411765, a: 1}
+  dayBottom: {r: 0.62352943, g: 0.72156864, b: 0.78431374, a: 1}
+  nightTop: {r: 0.14901961, g: 0.1882353, b: 0.24705882, a: 1}
+  nightBottom: {r: 0.07450981, g: 0.101960786, b: 0.14901961, a: 1}

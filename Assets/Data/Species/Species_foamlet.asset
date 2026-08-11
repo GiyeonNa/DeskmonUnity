@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9188220925321eb49aa5908fdad59c8b, type: 3}
+  m_Name: Species_foamlet
+  m_EditorClassIdentifier: 
+  id: foamlet
+  displayName: "\uAC70\uD488\uB9BF"
+  description: "\uD30C\uB3C4 \uAC70\uD488\uC774 \uBAA8\uC5EC \uC0DD\uAE34 \uC0DD\uBB3C\uB85C,
+    \uC6C3\uC744 \uB54C \uC791\uC740 \uAC70\uD488\uB4E4\uC774 \uBAB8\uC5D0\uC11C
+    \uD280\uC5B4\uB098\uC628\uB2E4."
+  field: 8
+  subfield: Foam
+  rarity: 0
+  forms: 1
+  formNames:
+  - "\uAC70\uD488\uB9BF"
+  formIds:
+  - foamlet
+  formDexNos: 5f000000
+  formSprites:
+  - {fileID: 21300000, guid: 39fa210de0693994089f4f3510bd0721, type: 3}
+  bodyColor: {r: 1, g: 1, b: 0.9333275, a: 1}
+  shinyColor: {r: 0.5225, g: 0.75334996, b: 0.95, a: 1}
+  rainbow: 0
+  hop: 0
+  nightOnly: 0
+  gate: 0
+  faction: 0
+  eventOnly: 0
+  evolveCondition: 0
+  pattern: 0

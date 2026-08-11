@@ -14,17 +14,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: mush
   displayName: "\uBC84\uC12F\uCAD1"
-  description: "\uCD95\uCD95\uD55C \uADF8\uB298\uC5D0\uC11C \uC790\uB77C\uB294 \uC7A5\uB09C\uAFB8\uB7EC\uAE30.
-    \uAC13\uC744 \uD754\uB4E4\uBA74 \uD3EC\uC790\uAC00 \uB0A0\uB9B0\uB2E4."
+  description: "\uCD95\uCD95\uD55C \uADF8\uB298\uC744 \uC88B\uC544\uD558\uB294 \uBC84\uC12F
+    \uC0DD\uBB3C\uB85C, \uAC13\uC744 \uD754\uB4E4\uC5B4 \uC7A5\uB09C\uC2A4\uB7EC\uC6B4
+    \uD3EC\uC790 \uAD6C\uB984\uC744 \uB9CC\uB4E0\uB2E4."
   field: 1
+  subfield: Mushroom
   rarity: 1
   forms: 2
   formNames:
   - "\uBC84\uC12F\uCAD1"
   - "\uAD11\uB300\uCAD1"
+  formIds:
+  - mushjong
+  - clowncap
+  formDexNos: 1600000017000000
   formSprites:
   - {fileID: 21300000, guid: c91e63a43bcbbb946a2bbd132752e918, type: 3}
-  - {fileID: 21300000, guid: c91e63a43bcbbb946a2bbd132752e918, type: 3}
+  - {fileID: 21300000, guid: 1d17667ad2a5dbb498815226734e98b6, type: 3}
   bodyColor: {r: 1, g: 0.5529412, b: 0.48235294, a: 1}
   shinyColor: {r: 0.49019608, g: 0.6627451, b: 1, a: 1}
   rainbow: 0

@@ -14,13 +14,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: origami
   displayName: "\uC885\uC774\uC811\uAE30"
-  description: "\uD3C9\uC77C \uB0AE, \uC77C\uD558\uB294 \uCC45\uC0C1\uC5D0\uC11C\uB9CC
-    \uC811\uD600 \uB098\uD0C0\uB098\uB294 \uC885\uC774 \uC0DD\uBB3C."
+  description: "\uC811\uD78C \uC885\uC774\uC5D0 \uC0DD\uBA85\uC774 \uAE43\uB4E0 \uC0DD\uBB3C\uB85C,
+    \uAC01\uC9C4 \uB0A0\uAC1C\uB97C \uC811\uC5C8\uB2E4 \uD3B4\uBA70 \uCC45\uC0C1
+    \uC704\uB97C \uBBF8\uB044\uB7EC\uC9C4\uB2E4."
   field: 3
+  subfield: Paper
   rarity: 1
   forms: 1
   formNames:
   - "\uC885\uC774\uC811\uAE30"
+  formIds:
+  - origami
+  formDexNos: 35000000
   formSprites:
   - {fileID: 21300000, guid: d201da85ea5257a4896f3ea8b6966708, type: 3}
   bodyColor: {r: 0.9411765, g: 0.9411765, b: 0.9411765, a: 1}

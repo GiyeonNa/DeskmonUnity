@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9188220925321eb49aa5908fdad59c8b, type: 3}
+  m_Name: Species_saplynx
+  m_EditorClassIdentifier: 
+  id: saplynx
+  displayName: "\uC218\uC561\uB9C1\uC2A4"
+  description: "\uD638\uBC15\uBE5B \uC218\uC561 \uBB34\uB2AC\uB97C \uC9C0\uB2CC \uBBFC\uCCA9\uD55C
+    \uC0DD\uBB3C\uB85C, \uB098\uBB34\uC904\uAE30\uB97C \uD0C0\uACE0 \uC870\uC6A9\uD788
+    \uC6C0\uC9C1\uC778\uB2E4."
+  field: 1
+  subfield: Oakwood
+  rarity: 1
+  forms: 2
+  formNames:
+  - "\uC218\uC561\uB9C1\uC2A4"
+  - "\uD638\uBC15\uB9C1\uC2A4"
+  formIds:
+  - saplynx
+  - amberlynx
+  formDexNos: 1f00000020000000
+  formSprites:
+  - {fileID: 21300000, guid: d2b45ed9b21cc174888f6b8cda5710be, type: 3}
+  - {fileID: 21300000, guid: d52e86ec050d1d94d8db7fa3cf80972d, type: 3}
+  bodyColor: {r: 0.86666715, g: 0.6666662, b: 0.3333331, a: 1}
+  shinyColor: {r: 0.33333313, g: 0.5973342, b: 0.86666715, a: 1}
+  rainbow: 0
+  hop: 0
+  nightOnly: 0
+  gate: 0
+  faction: 0
+  eventOnly: 0
+  evolveCondition: 0
+  pattern: 1

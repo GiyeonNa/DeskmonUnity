@@ -4,13 +4,21 @@ namespace Deskmon.Core
     public enum Rarity { Common, Rare, Epic, Legendary }
 
     /// <summary>
-    /// 출몰 풀. data.js FIELDS의 id + 코드에만 있는 두 개.
+    /// 출몰 풀. data.js FIELDS의 id + 코드에만 있는 두 개 + 151 원장의 확장 필드.
     ///
     /// special/event는 FIELDS 배열에 없지만 SPECIES가 참조한다(루미=special, 크로노=event).
     /// 해금 대상이 아니라 "일반 필드 규칙에서 빠지는 특수 풀"이라 별도 값으로 둔다.
     /// index.html:585 — field==='special'은 해금 검사 대신 서식지 2개 이상 조건을 탄다.
+    ///
+    /// 확장 9종(Cave~Weather)은 151 원장(기획서 §17) 도입분. 직렬화된 int와 세이브의
+    /// habitats 문자열(enum 이름 소문자)이 기존 값에 걸려 있으므로 반드시 뒤에만 추가한다.
     /// </summary>
-    public enum Field { Grass, Forest, Lake, Office, Special, Event }
+    public enum Field
+    {
+        Grass, Forest, Lake, Office, Special, Event,
+        // ── 151 원장 확장 필드. 해금 순서는 SpeciesImporter.FieldRows가 정본. ──
+        Cave, Mountain, Coast, Sky, City, Ruins, Machine, Dream, Weather,
+    }
 
     /// <summary>
     /// 출몰 게이트. data.js SPECIES의 gate 필드 (index.html:582-583).

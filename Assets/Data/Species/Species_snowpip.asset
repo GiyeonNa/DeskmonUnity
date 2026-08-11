@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9188220925321eb49aa5908fdad59c8b, type: 3}
+  m_Name: Species_snowpip
+  m_EditorClassIdentifier: 
+  id: snowpip
+  displayName: "\uB208\uC1A1\uD54D"
+  description: "\uB208\uC1A1\uC774 \uADC0\uB97C \uAC00\uC9C4 \uC791\uC740 \uACE0\uC0B0
+    \uC0DD\uBB3C\uB85C, \uB208\uBC2D \uC704\uB97C \uC9C0\uB098\uB3C4 \uBC1C\uC790\uAD6D\uC774
+    \uAC70\uC758 \uB0A8\uC9C0 \uC54A\uB294\uB2E4."
+  field: 7
+  subfield: Snow
+  rarity: 0
+  forms: 2
+  formNames:
+  - "\uB208\uC1A1\uD54D"
+  - "\uB208\uAF43\uBCCF"
+  formIds:
+  - snowpip
+  - snowcrest
+  formDexNos: 4f00000050000000
+  formSprites:
+  - {fileID: 21300000, guid: 1adb2d71f82f08c4f934a9b641931161, type: 3}
+  - {fileID: 21300000, guid: caa7714195cb8d24383884ca9cf18549, type: 3}
+  bodyColor: {r: 1, g: 1, b: 0.93332845, a: 1}
+  shinyColor: {r: 0.5225, g: 0.54815, b: 0.95, a: 1}
+  rainbow: 0
+  hop: 0
+  nightOnly: 0
+  gate: 0
+  faction: 0
+  eventOnly: 0
+  evolveCondition: 0
+  pattern: 0

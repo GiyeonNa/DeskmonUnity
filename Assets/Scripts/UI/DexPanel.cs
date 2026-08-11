@@ -245,7 +245,9 @@ namespace Deskmon.UI
                                     () => ShowDetail(_detailIndex - 1));
             UIKit.Fixed(prev.gameObject, 34f, 24f);
 
-            var no = UIKit.Label(nav, $"No.{_detailIndex + 1:000}", 13, UIKit.TextSub,
+            // 정본 도감 번호(151 원장, 기본형 기준). 원장 미연결 데이터면 목록 순서로 대체.
+            int dexNo = sp.DexNoAt(0);
+            var no = UIKit.Label(nav, $"No.{(dexNo > 0 ? dexNo : _detailIndex + 1):000}", 13, UIKit.TextSub,
                                  TextAnchor.MiddleCenter);
             UIKit.Fixed(no.gameObject, 70f, 24f);
 

@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9188220925321eb49aa5908fdad59c8b, type: 3}
+  m_Name: Species_micafox
+  m_EditorClassIdentifier: 
+  id: micafox
+  displayName: "\uC6B4\uBAA8\uC5EC\uC6B0"
+  description: "\uC6B4\uBAA8 \uC870\uAC01\uCC98\uB7FC \uBC18\uC9DD\uC774\uB294 \uAF2C\uB9AC\uB97C
+    \uAC00\uC9C4 \uC0DD\uBB3C\uB85C, \uD587\uBE5B \uAC01\uB3C4\uC5D0 \uB530\uB77C
+    \uC0C9\uC774 \uBC14\uB010\uB2E4."
+  field: 7
+  subfield: Mica
+  rarity: 2
+  forms: 1
+  formNames:
+  - "\uC6B4\uBAA8\uC5EC\uC6B0"
+  formIds:
+  - micafox
+  formDexNos: 5a000000
+  formSprites:
+  - {fileID: 21300000, guid: e130996ada4055d428537dce01c17dc1, type: 3}
+  bodyColor: {r: 0.933334, g: 0.60000026, b: 0.1999999, a: 1}
+  shinyColor: {r: 0.19999993, g: 0.933334, b: 0.5413336, a: 1}
+  rainbow: 0
+  hop: 0
+  nightOnly: 0
+  gate: 0
+  faction: 0
+  eventOnly: 0
+  evolveCondition: 0
+  pattern: 2

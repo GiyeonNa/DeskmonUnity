@@ -14,17 +14,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: dewdrop
   displayName: "\uC774\uC2AC\uBC29\uC6B8"
-  description: "\uD480\uC78E \uB05D\uC5D0 \uB9FA\uD788\uB294 \uB9D1\uC740 \uBB3C\uBC29\uC6B8.
-    \uC774\uC2AC \uD300\uC758 \uC0C1\uC9D5\uC774\uB2E4."
+  description: "\uB9D1\uC740 \uBB3C\uBC29\uC6B8\uC5D0\uC11C \uD0DC\uC5B4\uB09C \uC0DD\uBB3C\uB85C,
+    \uAE68\uB057\uD55C \uC218\uBA74 \uC704\uC5D0\uC11C\uB294 \uBAB8\uC774 \uAC70\uC758
+    \uD22C\uBA85\uD558\uAC8C \uBCF4\uC778\uB2E4."
   field: 2
+  subfield: Pond
   rarity: 0
   forms: 2
   formNames:
   - "\uC774\uC2AC\uBC29\uC6B8"
   - "\uC774\uC2AC\uC655\uAD00"
+  formIds:
+  - dewdrop
+  - dewcrown
+  formDexNos: 2500000026000000
   formSprites:
   - {fileID: 21300000, guid: 86cef6c97ac332b439b8759dc5cafb93, type: 3}
-  - {fileID: 21300000, guid: 86cef6c97ac332b439b8759dc5cafb93, type: 3}
+  - {fileID: 21300000, guid: 2c763938b39a96f4695a5cc6d27a84b5, type: 3}
   bodyColor: {r: 0.56078434, g: 0.8392157, b: 0.9098039, a: 1}
   shinyColor: {r: 1, g: 0.8392157, b: 0.627451, a: 1}
   rainbow: 0

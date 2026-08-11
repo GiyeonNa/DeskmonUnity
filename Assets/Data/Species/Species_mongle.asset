@@ -14,15 +14,22 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: mongle
   displayName: "\uBABD\uAE00\uC774"
-  description: "\uD587\uC0B4\uC744 \uC88B\uC544\uD558\uB294 \uC0C8\uC2F9 \uC824\uB9AC.
-    \uAE30\uBD84\uC774 \uC88B\uC73C\uBA74 \uBA38\uB9AC \uC704 \uC78E\uC774 \uC0B4\uB791\uAC70\uB9B0\uB2E4."
+  description: "\uD587\uC0B4\uC744 \uBA38\uAE08\uACE0 \uB9D0\uB791\uD558\uAC8C \uC790\uB77C\uB294
+    \uC0C8\uC2F9 \uC824\uB9AC\uB85C, \uAE30\uBD84\uC774 \uC88B\uC73C\uBA74 \uBA38\uB9AC
+    \uC704 \uC78E\uC774 \uC0B4\uC9DD \uD754\uB4E4\uB9B0\uB2E4."
   field: 0
+  subfield: Meadow
   rarity: 0
   forms: 3
   formNames:
   - "\uBABD\uAE00\uC774"
   - "\uC78E\uBABD\uC774"
   - "\uAF43\uBABD\uC774"
+  formIds:
+  - mongle
+  - leafmong
+  - bloomong
+  formDexNos: 010000000200000003000000
   formSprites:
   - {fileID: 21300000, guid: 1956feb3e2c90cc43b0658c0bb870120, type: 3}
   - {fileID: 21300000, guid: 3a70c5d9f96640b692ab4d1ee78b0ddc, type: 3}

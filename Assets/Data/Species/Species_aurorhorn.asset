@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9188220925321eb49aa5908fdad59c8b, type: 3}
+  m_Name: Species_aurorhorn
+  m_EditorClassIdentifier: 
+  id: aurorhorn
+  displayName: "\uC624\uB85C\uB85D"
+  description: "\uC624\uB85C\uB77C \uBE5B \uBFD4\uC744 \uC9C0\uB2CC \uACE0\uC0B0
+    \uC218\uD638\uC885\uC73C\uB85C, \uB9D1\uC740 \uBC24 \uB2A5\uC120 \uC704\uC5D0\uC11C\uB9CC
+    \uBAA8\uC2B5\uC744 \uBCF4\uC778\uB2E4."
+  field: 7
+  subfield: Aurora
+  rarity: 3
+  forms: 1
+  formNames:
+  - "\uC624\uB85C\uB85D"
+  formIds:
+  - aurorhorn
+  formDexNos: 58000000
+  formSprites:
+  - {fileID: 21300000, guid: a330270bc186d794fa4e1af6a504141b, type: 3}
+  bodyColor: {r: 1, g: 1, b: 0.8666669, a: 1}
+  shinyColor: {r: 0.5225, g: 0.54815, b: 0.95, a: 1}
+  rainbow: 0
+  hop: 0
+  nightOnly: 0
+  gate: 0
+  faction: 0
+  eventOnly: 0
+  evolveCondition: 0
+  pattern: 3

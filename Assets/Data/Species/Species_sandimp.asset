@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9188220925321eb49aa5908fdad59c8b, type: 3}
+  m_Name: Species_sandimp
+  m_EditorClassIdentifier: 
+  id: sandimp
+  displayName: "\uBAA8\uB798\uAE68\uBE44"
+  description: "\uBAA8\uB798\uC131 \uBA38\uB9AC\uB97C \uAC00\uC9C4 \uD574\uBCC0 \uC0DD\uBB3C\uB85C,
+    \uD30C\uB3C4\uAC00 \uC624\uAE30 \uC804\uC5D0 \uC7AC\uBE68\uB9AC \uC790\uB9AC\uB97C
+    \uC62E\uAE34\uB2E4."
+  field: 8
+  subfield: Sand
+  rarity: 0
+  forms: 2
+  formNames:
+  - "\uBAA8\uB798\uAE68\uBE44"
+  - "\uBAA8\uB798\uC131\uB839"
+  formIds:
+  - sandimp
+  - sandcastle
+  formDexNos: 5b0000005c000000
+  formSprites:
+  - {fileID: 21300000, guid: eec18d9ed3cb789468f012cc678f5b60, type: 3}
+  - {fileID: 21300000, guid: 8237bedfb14cf7a4d98139fb1bcd8ec0, type: 3}
+  bodyColor: {r: 1, g: 0.80000055, b: 0.4666671, a: 1}
+  shinyColor: {r: 0.4433337, g: 0.78533304, b: 0.95, a: 1}
+  rainbow: 0
+  hop: 0
+  nightOnly: 0
+  gate: 0
+  faction: 0
+  eventOnly: 0
+  evolveCondition: 0
+  pattern: 0

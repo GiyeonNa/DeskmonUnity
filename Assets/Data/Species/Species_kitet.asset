@@ -1,0 +1,43 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9188220925321eb49aa5908fdad59c8b, type: 3}
+  m_Name: Species_kitet
+  m_EditorClassIdentifier: 
+  id: kitet
+  displayName: "\uC5F0\uAF2C\uB9AC"
+  description: "\uC5F0\uCC98\uB7FC \uBAB8\uC744 \uD3BC\uCCD0 \uBC14\uB78C\uC744 \uD0C0\uB294
+    \uC0DD\uBB3C\uB85C, \uAE34 \uB9AC\uBCF8 \uAF2C\uB9AC\uB85C \uBC29\uD5A5\uC744
+    \uC7A1\uB294\uB2E4."
+  field: 9
+  subfield: Wind
+  rarity: 0
+  forms: 2
+  formNames:
+  - "\uC5F0\uAF2C\uB9AC"
+  - "\uC5F0\uB0A0\uAC1C"
+  formIds:
+  - kitet
+  - kitewing
+  formDexNos: 690000006a000000
+  formSprites:
+  - {fileID: 21300000, guid: 52b4006d5e9cd41409b820667ac76788, type: 3}
+  - {fileID: 21300000, guid: 5e720463b3cdfcd46ac3e3db6c6e7141, type: 3}
+  bodyColor: {r: 1, g: 0.933334, b: 0.79999954, a: 1}
+  shinyColor: {r: 0.7599996, g: 0.9145325, b: 0.95, a: 1}
+  rainbow: 0
+  hop: 0
+  nightOnly: 0
+  gate: 0
+  faction: 0
+  eventOnly: 0
+  evolveCondition: 0
+  pattern: 0

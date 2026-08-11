@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9188220925321eb49aa5908fdad59c8b, type: 3}
+  m_Name: Species_obeliskid
+  m_EditorClassIdentifier: 
+  id: obeliskid
+  displayName: "\uC624\uBCA8\uD0A4\uB4DC"
+  description: "\uC791\uC740 \uC624\uBCA8\uB9AC\uC2A4\uD06C \uD615\uD0DC\uC758 \uC0DD\uBB3C\uB85C,
+    \uC544\uC9C1 \uC0C8\uACA8\uC9C4 \uBB38\uC790\uB294 \uB9CE\uC9C0 \uC54A\uB2E4."
+  field: 11
+  subfield: Obelisk
+  rarity: 0
+  forms: 3
+  formNames:
+  - "\uC624\uBCA8\uD0A4\uB4DC"
+  - "\uC624\uBCA8\uB9AC\uC2A4\uCE74"
+  - "\uBAA8\uB178\uB9AC\uD1A4"
+  formIds:
+  - obeliskid
+  - obeliskar
+  - monolithon
+  formDexNos: 790000007a0000007b000000
+  formSprites:
+  - {fileID: 21300000, guid: da5ab58ffca61c24dbce17b8aede65d5, type: 3}
+  - {fileID: 21300000, guid: a34b5a654c446d44880531655a643336, type: 3}
+  - {fileID: 21300000, guid: 3c7b7afbde6c5694ea1a8dc78e0f42b6, type: 3}
+  bodyColor: {r: 0.866667, g: 0.80000067, b: 0.5999993, a: 1}
+  shinyColor: {r: 0.5999993, g: 0.7146658, b: 0.866667, a: 1}
+  rainbow: 0
+  hop: 0
+  nightOnly: 0
+  gate: 0
+  faction: 0
+  eventOnly: 0
+  evolveCondition: 0
+  pattern: 0

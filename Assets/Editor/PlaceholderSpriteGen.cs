@@ -18,10 +18,11 @@ namespace Deskmon.EditorTools
         const int SIZE = 48;
         const string DIR = "Assets/Sprites";
 
-        // data.js SPECIES의 color 값 — 종별 팔레트 기준색
+        // data.js SPECIES의 color 값 — 종별 팔레트 기준색.
+        // kkang/bandi는 151 원장 재편에서 도감 제외돼 뺐다 (SpeciesImporter.Retired).
         static readonly (string id, string hex)[] Species =
         {
-            ("mongle",  "#8fd977"), ("kkang",   "#ffd35c"), ("bandi",   "#7dd6ff"),
+            ("mongle",  "#8fd977"),
             ("dotori",  "#b98d5e"), ("mush",    "#ff8d7b"), ("owl",     "#a98bff"),
             ("lumi",    "#ffffff"), ("dewdrop", "#8fd6e8"), ("mossy",   "#9cc26b"),
             ("origami", "#f0f0f0"), ("dozy",    "#b3a6e0"), ("chrono",  "#ffffff"),

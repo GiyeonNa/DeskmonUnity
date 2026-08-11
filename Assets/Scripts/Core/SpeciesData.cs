@@ -26,6 +26,10 @@ namespace Deskmon.Core
 
         [Header("분류")]
         public Field field = Field.Grass;
+
+        [Tooltip("151 원장의 확장 서브필드 (예: Meadow, Clockwork). 출몰 규칙에는 아직 안 쓰이고 표기용.")]
+        public string subfield;
+
         public Rarity rarity = Rarity.Common;
 
         [Tooltip("폼 수. 1=무진화, 2=1진화, 3=2진화.")]
@@ -33,6 +37,12 @@ namespace Deskmon.Core
 
         [Tooltip("폼별 이름. 길이는 forms와 같아야 한다.")]
         public string[] formNames = new string[1];
+
+        [Tooltip("151 원장의 폼별 영문 id (예: mongle/leafmong/bloomong). 스프라이트 원본 추적용.")]
+        public string[] formIds = new string[0];
+
+        [Tooltip("151 원장의 폼별 도감 번호. 도감 정책상 진화체마다 개별 번호를 가진다 (기획서 §8.2).")]
+        public int[] formDexNos = new int[0];
 
         [Header("아트")]
         [Tooltip("폼별 스프라이트. 비어 있으면 기본 스프라이트를 재사용한다(플레이스홀더 단계).")]
@@ -82,6 +92,13 @@ namespace Deskmon.Core
                 && !string.IsNullOrEmpty(formNames[stage]))
                 return formNames[stage];
             return displayName;
+        }
+
+        /// <summary>해당 단계의 정본 도감 번호. 원장 미연결(구 데이터)이면 0.</summary>
+        public int DexNoAt(int stage)
+        {
+            if (formDexNos == null || formDexNos.Length == 0) return 0;
+            return formDexNos[Mathf.Clamp(stage, 0, formDexNos.Length - 1)];
         }
 
         /// <summary>해당 단계의 스프라이트. 아직 폼별 도트가 없으면 0번을 재사용한다.</summary>

@@ -14,17 +14,23 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: mossy
   displayName: "\uC774\uB07C\uB3CC"
-  description: "\uC624\uB798\uB41C \uBC14\uC704\uC5D0 \uC774\uB07C\uAC00 \uC790\uB77C
-    \uAE68\uC5B4\uB09C \uC815\uB839. \uC774\uB07C \uD300\uC758 \uC0C1\uC9D5\uC774\uB2E4."
+  description: "\uBB3C\uAC00\uC758 \uB3CC\uC5D0 \uC774\uB07C\uAC00 \uC790\uB77C \uAE68\uC5B4\uB09C
+    \uC0DD\uBB3C\uB85C, \uD587\uBE5B\uBCF4\uB2E4 \uC11C\uB298\uD55C \uADF8\uB298\uC744
+    \uC88B\uC544\uD55C\uB2E4."
   field: 2
+  subfield: Shore
   rarity: 0
   forms: 2
   formNames:
   - "\uC774\uB07C\uB3CC"
   - "\uC774\uB07C\uAC70\uC778"
+  formIds:
+  - mossy
+  - mossgolem
+  formDexNos: 2700000028000000
   formSprites:
   - {fileID: 21300000, guid: 6e4f3267f5a242a4485772f6bf58789e, type: 3}
-  - {fileID: 21300000, guid: 6e4f3267f5a242a4485772f6bf58789e, type: 3}
+  - {fileID: 21300000, guid: 58b4000d92fdaa84c8922c57110a0a6c, type: 3}
   bodyColor: {r: 0.6117647, g: 0.7607843, b: 0.41960785, a: 1}
   shinyColor: {r: 0.78431374, g: 0.6117647, b: 1, a: 1}
   rainbow: 0

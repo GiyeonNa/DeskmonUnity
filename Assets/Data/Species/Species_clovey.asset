@@ -1,0 +1,42 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9188220925321eb49aa5908fdad59c8b, type: 3}
+  m_Name: Species_clovey
+  m_EditorClassIdentifier: 
+  id: clovey
+  displayName: "\uD074\uB85C\uBE44"
+  description: "\uB124\uC78E \uC78E\uC0AC\uADC0 \uADC0\uB85C \uD589\uC6B4\uC758 \uBC14\uB78C\uC744
+    \uB290\uB07C\uBA70, \uBC1C\uC18C\uB9AC \uC5C6\uC774 \uD480\uBC2D\uC744 \uC9C0\uB098\uAC04\uB2E4."
+  field: 0
+  subfield: Meadow
+  rarity: 0
+  forms: 2
+  formNames:
+  - "\uD074\uB85C\uBE44"
+  - "\uD074\uB85C\uBC84\uB9B0"
+  formIds:
+  - clovey
+  - cloverin
+  formDexNos: 090000000a000000
+  formSprites:
+  - {fileID: 21300000, guid: f105b38e25c97a142b48863704259510, type: 3}
+  - {fileID: 21300000, guid: 116e103108f221d42ad3698d26262658, type: 3}
+  bodyColor: {r: 0.46666712, g: 0.733333, b: 0.13333324, a: 1}
+  shinyColor: {r: 0.733333, g: 0.13333319, b: 0.45466715, a: 1}
+  rainbow: 0
+  hop: 0
+  nightOnly: 0
+  gate: 0
+  faction: 0
+  eventOnly: 0
+  evolveCondition: 0
+  pattern: 0

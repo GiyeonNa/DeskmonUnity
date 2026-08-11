@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a21e1dcee10800e4098b428fb5a8b297, type: 3}
+  m_Name: Field_Machine
+  m_EditorClassIdentifier: 
+  id: 12
+  displayName: "\uAE30\uACC4"
+  unlockCost: 2000000
+  dayTop: {r: 0.8862745, g: 0.9019608, b: 0.91764706, a: 1}
+  dayBottom: {r: 0.6666667, g: 0.7058824, b: 0.7411765, a: 1}
+  nightTop: {r: 0.13725491, g: 0.15686275, b: 0.2, a: 1}
+  nightBottom: {r: 0.07058824, g: 0.08627451, b: 0.11764706, a: 1}

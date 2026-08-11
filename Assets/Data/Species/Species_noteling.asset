@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9188220925321eb49aa5908fdad59c8b, type: 3}
+  m_Name: Species_noteling
+  m_EditorClassIdentifier: 
+  id: noteling
+  displayName: "\uB178\uD2B8\uB9C1"
+  description: "\uC904\uB178\uD2B8 \uBB34\uB2AC \uBAB8\uC744 \uAC00\uC9C4 \uC0DD\uBB3C\uB85C,
+    \uAC78\uC5B4\uAC04 \uC790\uB9AC\uC5D0\uB294 \uD76C\uBBF8\uD55C \uC810\uC120 \uC790\uAD6D\uC774
+    \uB0A8\uB294\uB2E4."
+  field: 3
+  subfield: Paper
+  rarity: 0
+  forms: 3
+  formNames:
+  - "\uB178\uD2B8\uB9C1"
+  - "\uD398\uC774\uC9C0\uB9C1"
+  - "\uCC45\uB0A0\uAC1C"
+  formIds:
+  - noteling
+  - pageling
+  - bookwing
+  formDexNos: 3d0000003e0000003f000000
+  formSprites:
+  - {fileID: 21300000, guid: 6c4b4e98b0cd94e448b8269bd8e71b15, type: 3}
+  - {fileID: 21300000, guid: 57be2822031a4e24f808ddcd683603c2, type: 3}
+  - {fileID: 21300000, guid: 7c2f665586638054ea4840f322c56da3, type: 3}
+  bodyColor: {r: 1, g: 1, b: 0.8666584, a: 1}
+  shinyColor: {r: 0.90725005, g: 0.5225, b: 0.95, a: 1}
+  rainbow: 0
+  hop: 0
+  nightOnly: 0
+  gate: 0
+  faction: 0
+  eventOnly: 0
+  evolveCondition: 0
+  pattern: 0

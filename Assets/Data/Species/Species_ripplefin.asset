@@ -1,0 +1,46 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9188220925321eb49aa5908fdad59c8b, type: 3}
+  m_Name: Species_ripplefin
+  m_EditorClassIdentifier: 
+  id: ripplefin
+  displayName: "\uC794\uBB3C\uACB0\uD540"
+  description: "\uC791\uC740 \uC9C0\uB290\uB7EC\uBBF8\uB85C \uC794\uBB3C\uACB0\uC744
+    \uB9CC\uB4DC\uB294 \uC0DD\uBB3C\uB85C, \uC5EC\uB7FF\uC774 \uBAA8\uC774\uBA74
+    \uC218\uBA74\uC5D0 \uBB34\uB2AC\uAC00 \uC0DD\uAE34\uB2E4."
+  field: 2
+  subfield: Pond
+  rarity: 0
+  forms: 3
+  formNames:
+  - "\uC794\uBB3C\uACB0\uD540"
+  - "\uBB3C\uACB0\uD540"
+  - "\uB108\uC6B8\uD540"
+  formIds:
+  - ripplefin
+  - wavefin
+  - broadfin
+  formDexNos: 290000002a0000002b000000
+  formSprites:
+  - {fileID: 21300000, guid: 0786c6debd8ac5f4babaf68a80a891ea, type: 3}
+  - {fileID: 21300000, guid: 2ca51155fb3368f40acf0359e50c72ce, type: 3}
+  - {fileID: 21300000, guid: 22f002019b9cffe48bf4dfd948abf533, type: 3}
+  bodyColor: {r: 0.26666647, g: 0.7333327, b: 0.8666677, a: 1}
+  shinyColor: {r: 0.8666677, g: 0.40000147, b: 0.26666644, a: 1}
+  rainbow: 0
+  hop: 0
+  nightOnly: 0
+  gate: 0
+  faction: 0
+  eventOnly: 0
+  evolveCondition: 0
+  pattern: 0

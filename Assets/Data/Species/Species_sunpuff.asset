@@ -1,0 +1,40 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9188220925321eb49aa5908fdad59c8b, type: 3}
+  m_Name: Species_sunpuff
+  m_EditorClassIdentifier: 
+  id: sunpuff
+  displayName: "\uD587\uC19C"
+  description: "\uBBFC\uB4E4\uB808 \uC19C\uCC98\uB7FC \uAC00\uBCBC\uC6B4 \uBAB8\uC744
+    \uC9C0\uB154\uC73C\uBA70, \uBC14\uB78C\uC774 \uBD88\uBA74 \uBAA9\uC801\uC9C0
+    \uC5C6\uC774 \uB465\uC2E4 \uB5A0\uAC04\uB2E4."
+  field: 0
+  subfield: Meadow
+  rarity: 1
+  forms: 1
+  formNames:
+  - "\uD587\uC19C"
+  formIds:
+  - sunpuff
+  formDexNos: 0b000000
+  formSprites:
+  - {fileID: 21300000, guid: 0585af7de2195df4cabb376b0f943e09, type: 3}
+  bodyColor: {r: 1, g: 1, b: 0.39999977, a: 1}
+  shinyColor: {r: 0.5851999, g: 0.37999976, b: 0.95, a: 1}
+  rainbow: 0
+  hop: 0
+  nightOnly: 0
+  gate: 0
+  faction: 0
+  eventOnly: 0
+  evolveCondition: 0
+  pattern: 1

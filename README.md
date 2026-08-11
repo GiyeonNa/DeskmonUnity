@@ -1,61 +1,76 @@
 # 데스크몬 (Deskmon) — Unity
 
 바탕화면에서 픽셀 크리처를 만나고, 잡고, 함께 사는 데스크탑 마스코트 게임.
-검증이 끝난 Electron 프로토타입을 Unity로 포팅하는 중이다.
+투명 오버레이 창이 화면 전체를 덮고, 크리처가 작업 중인 창들 위를 산책한다.
+포획은 마우스로 문양을 그리는 "각인"으로 한다.
 
-- **엔진**: Unity 6000.0.77f1 · Windows Standalone
-- **원본**: Electron 프로토타입 (동작 "정답지"로 사용)
-- **기획**: `데스크몬_기획서_v4.md` · **포팅 계획**: `데스크몬_Unity포팅계획.md`
+- **엔진**: Unity 6000.0.77f1 · Windows Standalone (D3D11 · BitBlt 스왑체인)
+- **원본**: 검증이 끝난 Electron 프로토타입 (동작 "정답지"로 사용, 포팅 완료)
+- **창 제어**: [UniWindowController](https://github.com/kirurobo/UniWindowController) (UPM git 의존성 — 최초 열기 때 자동 수신)
 
-## 현재 상태 — S2 코어 루프 완료
+## 무엇이 있나
 
-포팅계획 §4의 6단계(S0~S5) 중 **S0~S2 코드 완료**. 다음은 S3.
+- **출몰과 포획** — 시간·요일·작업 여부에 따라 야생이 나타난다. 접근 난이도
+  3종(느긋함·겁쟁이·순간이동)을 뚫고 각인 문양을 그리면 포획. 잡히기 전까지
+  야생은 떠나지 않는다.
+- **도감 151종** — 진화체마다 개별 도감 번호를 갖는 151 엔트리(80 진화 라인).
+  전 종 실제 64px 도트 연결. 상세 보기에서 좌우로 번호 순환, 도감 카드 이미지 저장.
+- **필드 13종** — 초원부터 동굴·산·해안·하늘·도시·유적·기계·꿈·날씨까지
+  베리로 해금. 별도로 스페셜(루미 등)과 이벤트(크로노·소원지) 풀이 있다.
+- **키우기** — 방목(필드 해금당 슬롯 +1), 쓰다듬기/간식 친밀도, 진화(야행·만복
+  게이트), 샤이니(팔레트 스왑 셰이더), 전설 무지개 연출.
+- **진영** — 호수 해금 시 이슬/이끼 팀 선택. 진영 배타 종이 갈린다.
+- **손맛** — 공놀이(기획 v4 §6.2), 합성 효과음(에셋 없이 런타임 베이크).
+- **이벤트** — 크로노는 매주 금요일 밤 모두의 화면에 동시에 나타난다.
 
-S2의 DoD "한 종을 잡아 도감에 등록"이 성립한다 —
-출몰 스케줄 → 각인 포획 → 포획 연출 → 도감 등록 → 저장.
+## 구조
 
 ### 런타임 (`Assets/Scripts/`)
 
 | 영역 | 파일 | 내용 |
 |---|---|---|
 | 창 제어 | `Native/WindowController.cs` | UniWinC 파사드. 투명/항상위/클릭통과/전체화면 앱 감지 |
-| 오버레이 | `Native/DesktopOverlay.cs` | 커서 근접 → 클릭통과 토글, 전체화면 자동 숨김, 항상위 재확보 |
-| 안전장치 | `Native/Killswitch.cs` | Ctrl+Alt+Q 전역 핫키 + 폴링 + 워치독 + 검은화면 자동 종료 |
-| 커서 | `Native/NativeCursor.cs` | 클릭통과 중 커서를 읽기 위한 GetCursorPos 폴링 |
-| 유휴 | `Native/IdleTime.cs` | GetLastInputInfo (32비트 래핑 처리) |
-| 데이터 | `Core/SpeciesData` `FieldData` `BalanceData` `DeskmonDatabase` | `data.js` 1:1 이전 (ScriptableObject) |
-| 세이브 | `Core/SaveData` `SaveSystem` | 원본 JSON 스키마 유지 + `migrateV4` + 원자적 쓰기 |
-| 진행 | `Core/CreatureRegistry` | 도감 등록, 마일스톤, 생산량 |
-| 루프 | `Core/GameState` `SpawnScheduler` | 출몰 → 포획 → 등록 → 저장을 잇는 지점 |
-| 포획 | `Capture/SigilRecognizer` | $1 Unistroke 이식. 문양 8종 + 그리기 변형·거울상 |
-| | `Capture/SigilCapture` `SigilInput` `SigilUI` | 각인 판정 / 입력 / 렌더 |
-| | `Capture/WildBehavior` | 접근 난이도 (느긋함·겁쟁이·순간이동) |
-| | `Capture/CaptureEffects` `CaughtAnimation` | 링·하트·반짝임, 날아가기 |
-| 크리처 | `Creatures/CreatureView` `CreatureAppearance` | 산책 모션 / 팔레트 스왑·아웃라인 |
+| 오버레이 | `Native/DesktopOverlay.cs` | 커서 근접 → 클릭통과 토글, 전체화면 자동 숨김 |
+| 안전장치 | `Native/Killswitch.cs` | Ctrl+Alt+Q 전역 핫키 + 워치독 + 검은화면 자동 종료 |
+| 유휴 | `Native/IdleTime.cs` | GetLastInputInfo — "작업 중" 판정의 근거 |
+| 데이터 | `Core/SpeciesData` `FieldData` `BalanceData` `DeskmonDatabase` | ScriptableObject. 종 80라인 · 필드 13 |
+| 세이브 | `Core/SaveData` `SaveSystem` | 원본 JSON 스키마 유지 + 마이그레이션 + 원자적 쓰기 |
+| 루프 | `Core/GameState` `SpawnScheduler` `RoamSystem` `RoamManager` | 출몰 스케줄 · 방목 |
+| 성장 | `Core/FriendshipSystem` `EvolutionSystem` `CreatureRegistry` | 친밀도 · 진화 연쇄 · 도감 등록/마일스톤 |
+| 포획 | `Capture/` | $1 Unistroke 각인 인식 · 접근 패턴 · 포획 연출 |
+| 크리처 | `Creatures/` | 산책 모션 · 팔레트 스왑/아웃라인 · 공놀이 |
+| UI | `UI/` | 코너 카드 · 도감(상세/카드 저장) · 가방 · 설정 · 진영 모달 · 테마 |
+| 개발 | `Core/DevOverrides` `GameDebugHUD` | DEV.time/work/day 오버라이드 — 게이트 실측용 (배포 빌드 제외) |
 
-### 개발용 (배포물에 미포함)
+### 데이터 파이프라인 — 문서가 정본
 
-`SpikeHUD` · `Capture/SigilTestHarness` — 검증 HUD.
-씬 `S0_Spike` · `SigilTest`, 그리고 `Editor/` 의 씬 생성기와 자가 점검 도구.
+`Docs/151종_몬스터_스프라이트_생성_기획서.md` §17 "도감 번호 기준 원장"(151행 표)이
+게임 데이터의 정본이다. 에디터 임포터가 이 md를 **직접 파싱**한다:
 
-### 검증 이력 (2026-08-06, 빌드에서 확인)
+```
+기획서 §17 표 수정
+  → [Deskmon/데이터 임포트 (151 원장 -> 에셋)]
+  → 진화군 복원(151 엔트리 → 80라인) + SpeciesData/FieldData 생성
+  → MonsterGenV2_64 도트를 런타임 이름으로 복사 + 픽셀 임포트 설정 강제
+```
 
-- [x] 투명·항상위·클릭통과 창 + 뒤쪽 창 클릭
-- [x] 코어 루프: 출몰 → 각인 → 포획 연출 → 도감 등록 → 저장/복원
-- [x] 각인 UI(GL)가 투명 오버레이 위에서 정상 렌더
-- [x] 전체화면 감지 — Win11 WorkerW 오탐 수정 후 정상 (숨김/복귀 로그 항상 남음)
-- [ ] 멀티모니터 · DPI 배율 환경 (포팅계획 §6 최우선 리스크)
+- 원장에 없는 게임플레이 값은 휴리스틱(희귀도→행동패턴, 서브필드→출몰 게이트)과
+  data.js 시절 손튜닝 오버라이드로 채운다 (`Assets/Editor/SpeciesImporter.cs`).
+- 대표색은 도트에서 최빈색을 추출한다 — 팔레트 스왑의 기준색이라 실색과 일치해야
+  샤이니가 물든다. 샤이니색은 id 해시 기반 색상 회전(재임포트해도 동일).
+- `Assets/Sprites/`에 png를 넣으면 `SpriteAutoLink`가 임포트를 자동 실행한다.
+- CLI에서 임포트를 요청하려면 프로젝트 루트에 `.deskmon-import-request` 파일을
+  만들고 에디터에 포커스를 주면 된다 (`Assets/Editor/ImportRequest.cs`).
+
+아트 규칙: 정본 64x64 · PPU 100 · Point 필터 · 무압축. `Docs/픽셀_스타일_가이드.md` 참조.
 
 ## 빌드
 
-UniWinC는 UPM git 의존성이라 최초 열기 때 자동으로 받아온다 (`Packages/manifest.json`,
-버전은 `packages-lock.json`에 해시로 고정).
-
 **처음 열었다면 순서대로:**
 
-1. `Deskmon/데이터 임포트 (data.js -> 에셋)` — 종 12·필드 4 에셋 생성
+1. `Deskmon/데이터 임포트 (151 원장 -> 에셋)` — 종 80라인 · 필드 13 에셋 생성
 2. `Deskmon/본 게임 씬 생성` — `Assets/Scenes/Main.unity` + 빌드 대상 등록
-3. `Deskmon/빌드 후 실행`
+3. `Deskmon/빌드 후 실행 (배포)` 또는 `Deskmon/개발 빌드 후 실행`
 
 CLI (배치 빌드):
 
@@ -81,29 +96,35 @@ Unity.exe -quit -batchmode -nographics \
 코드 서명은 인증서 확보 후 `Deskmon.iss`의 SignTool 주석을 해제한다.
 이 앱은 투명 오버레이 + 전역 키 폴링이라 서명 없이는 백신 오탐 확률이 높다.
 
-### 검증 도구
+### 검증 도구 (에디터 메뉴)
 
-- `Deskmon/각인 UI 테스트 씬 생성` — 문양을 직접 그려본다. 이전/다음으로 8종 순회
+- `Deskmon/S3 로직 자가 점검` — 방목·친밀도·진화 규칙 회귀 확인 (임시 세이브 사용)
 - `Deskmon/각인 인식 자가 점검` — 문양 추가 후 회귀 확인 (자기 분류·거울상·출제 정합)
-- `Deskmon/S0 스파이크 씬 생성` — 투명 창만 떼어내 확인. 빌드 대상은 바꾸지 않는다
+- `Deskmon/각인 UI 테스트 씬 생성` — 문양을 직접 그려본다
+- `Deskmon/S0 스파이크 씬 생성` — 투명 창만 떼어내 확인
 
 > **종료는 Ctrl+Alt+Q.** 이 앱은 포커스를 받지 않고 Alt+Tab·작업표시줄에도 뜨지 않는다.
 > 렌더가 잘못되면 작업 관리자 외에 끌 방법이 없어서 전역 핫키가 안전장치로 항상 들어간다.
 
-## 앞으로
+## 문서 (`Docs/`)
 
-| 단계 | 내용 | 상태 |
-|---|---|---|
-| S1 | 픽셀 크리처 — 정지 스프라이트 + 코드 모션, 팔레트스왑 샤이니 | 코드 완료 · **도트 6종 제작 남음** |
-| S2 | 코어 루프 — 출몰 → 각인 포획 → 연출 → 데이터/세이브 | 완료 |
-| S3 | 시스템 — 방목·친밀도·진화, 코너 카드 UI, 도감/가방/설정 | 다음 |
-| S4 | 콘텐츠 — 필드 4·종 12, 진영, 크로노, 출몰 조건 매트릭스 | |
-| S5 | 폴리시·패키징 — 오디오·파티클, 서명된 .exe | |
+| 문서 | 내용 |
+|---|---|
+| `151종_몬스터_스프라이트_생성_기획서.md` | **§17 도감 원장 = 게임 데이터 정본.** 생성 프롬프트·검수 기준 포함 |
+| `151종_몬스터_디자인_원장.md` | 종별 실루엣·파츠·팔레트·금지 소재 디자인 원장 |
+| `몬스터_디자인_품질기준.md` | 디자인 품질 기준 |
+| `UI_이미지_기획서.md` | UI 테마 이미지 기획 (frame/badge/icon 파이프라인) |
+| `픽셀_스타일_가이드.md` | 도트 제작 규칙 (64px · 팔레트 · 외곽선) |
 
-**S3 시작 전 필요한 결정** — 기획서 v4 §11의 열린 결정 중 *방목 최대 슬롯 수*(5 가안).
-UI 레이아웃이 여기 물린다.
+기획서 v4·Unity 포팅계획은 저장소 밖 상위 문서다. 코드 주석이 해당 절을 인용한다.
 
-아트는 `Docs/픽셀_스타일_가이드.md` 기준. 현재 스프라이트는 코드 생성 플레이스홀더다.
+## 남은 것
+
+- 필드 해금 비용 사다리(동굴 5천 → 날씨 1,200만 베리)는 가안 — 실측 후 조정
+- 신규 종 자동 추출 색 스팟체크 (이상한 종만 `SpeciesImporter.Overrides`에 손색 추가)
+- 걷기 애니메이션 (도트 v2 제작됨 · `Assets/Sprites/MonsterWalk64/` · 코드 미연결)
+- 멀티모니터 · DPI 배율 환경 검증
+- 코드 서명
 
 ## 참고 — 폐기한 접근
 

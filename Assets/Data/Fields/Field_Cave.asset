@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   id: 6
   displayName: "\uB3D9\uAD74"
-  unlockCost: 5000
+  unlockCost: 100000
   dayTop: {r: 0.8117647, g: 0.78431374, b: 0.84705883, a: 1}
   dayBottom: {r: 0.62352943, g: 0.5764706, b: 0.6901961, a: 1}
   nightTop: {r: 0.14117648, g: 0.11764706, b: 0.2, a: 1}

@@ -17,17 +17,24 @@ namespace Deskmon.EditorTools
     [InitializeOnLoad]
     public static class ImportRequest
     {
-        const string MARKER = ".deskmon-import-request";
+        const string IMPORT_MARKER = ".deskmon-import-request";
+        const string SELFCHECK_MARKER = ".deskmon-selfcheck-request";
 
         static ImportRequest()
         {
-            if (!File.Exists(MARKER)) return;
+            Schedule(IMPORT_MARKER, SpeciesImporter.Import);
+            Schedule(SELFCHECK_MARKER, S3SelfCheck.Run);
+        }
+
+        static void Schedule(string marker, System.Action action)
+        {
+            if (!File.Exists(marker)) return;
 
             EditorApplication.delayCall += () =>
             {
-                if (!File.Exists(MARKER)) return;   // delayCall 사이 중복 방지
-                File.Delete(MARKER);
-                SpeciesImporter.Import();
+                if (!File.Exists(marker)) return;   // delayCall 사이 중복 방지
+                File.Delete(marker);
+                action();
             };
         }
     }

@@ -90,7 +90,7 @@ namespace Deskmon.UI
                     var row = UIKit.HRow(_list, 26f);
                     UIKit.Fixed(row.gameObject, 0f, 26f);
 
-                    var btn = UIKit.Button(row, $"해금 (베리 {field.unlockCost})", 12,
+                    var btn = UIKit.Button(row, $"해금 (베리 {UIKit.Fmt(field.unlockCost)})", 12,
                         new Vector2(150f, 24f), () => Unlock(field));
                     btn.interactable = save.berry >= field.unlockCost;
                     UIKit.Fixed(btn.gameObject, 150f, 24f);

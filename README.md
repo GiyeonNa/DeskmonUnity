@@ -120,7 +120,7 @@ Unity.exe -quit -batchmode -nographics \
 
 ## 남은 것
 
-- 필드 해금 비용 사다리(동굴 5천 → 날씨 1,200만 베리)는 가안 — 실측 후 조정
+- 필드 해금 비용 사다리(동굴 10만 → 날씨 7억 베리)는 시뮬레이션 보정값 — 플레이 실측 후 재조정
 - 신규 종 자동 추출 색 스팟체크 (이상한 종만 `SpeciesImporter.Overrides`에 손색 추가)
 - 걷기 애니메이션 (도트 v2 제작됨 · `Assets/Sprites/MonsterWalk64/` · 코드 미연결)
 - 멀티모니터 · DPI 배율 환경 검증

@@ -79,7 +79,12 @@ namespace Deskmon.EditorTools
         static readonly string[] Retired = { "kkang", "bandi" };
 
         // data.js FIELDS + 151 원장 확장 필드.
-        // 해금 비용은 기존 곡선(x3 근사)을 이어 붙인 가안 - 밸런스 실측 전까지의 사다리다.
+        //
+        // 해금 비용은 시뮬레이션으로 보정한 값 (2026-08-13). 보유 크리처 전원이 상시
+        // 생산하는 경제라 수입이 포획 수에 비례해 폭증한다 - 초기 가안(5천~1,200만)은
+        // 하루 만에 전부 뚫렸다. 현 사다리는 하루 9시간 온라인/포획률 25% 기준
+        // 첫날 3필드, 이후 2~6일 간격, 18일 차 완주가 나오게 잡았다 (포획률 60%면 12일).
+        // 진화/친밀도 수입은 뺀 보수적 추정이므로 실제는 다소 빠르다. 실측 후 재조정.
         struct FieldRow
         {
             public Field id; public string name; public int cost;
@@ -96,23 +101,23 @@ namespace Deskmon.EditorTools
                            dayTop="#cfeaf0", dayBottom="#8fcdd8", nightTop="#1c3540", nightBottom="#0e2029" },
             new FieldRow { id=Field.Office,   name="사무", cost=1800,
                            dayTop="#ece8e0", dayBottom="#c3bcae", nightTop="#2a2a33", nightBottom="#16161c" },
-            new FieldRow { id=Field.Cave,     name="동굴", cost=5000,
+            new FieldRow { id=Field.Cave,     name="동굴", cost=100000,
                            dayTop="#cfc8d8", dayBottom="#9f93b0", nightTop="#241e33", nightBottom="#120f1f" },
-            new FieldRow { id=Field.Mountain, name="산",   cost=14000,
+            new FieldRow { id=Field.Mountain, name="산",   cost=700000,
                            dayTop="#e8f2f8", dayBottom="#b8d0dc", nightTop="#263a4d", nightBottom="#14222f" },
-            new FieldRow { id=Field.Coast,    name="해안", cost=40000,
+            new FieldRow { id=Field.Coast,    name="해안", cost=2000000,
                            dayTop="#cfeef2", dayBottom="#eeddb2", nightTop="#1c3140", nightBottom="#241f33" },
-            new FieldRow { id=Field.Sky,      name="하늘", cost=110000,
+            new FieldRow { id=Field.Sky,      name="하늘", cost=7000000,
                            dayTop="#d8ecfb", dayBottom="#aacdf0", nightTop="#202c4d", nightBottom="#101830" },
-            new FieldRow { id=Field.City,     name="도시", cost=300000,
+            new FieldRow { id=Field.City,     name="도시", cost=20000000,
                            dayTop="#e6e2ea", dayBottom="#b8b2c2", nightTop="#2b2340", nightBottom="#171129" },
-            new FieldRow { id=Field.Ruins,    name="유적", cost=800000,
+            new FieldRow { id=Field.Ruins,    name="유적", cost=60000000,
                            dayTop="#eee6d2", dayBottom="#c2b491", nightTop="#2e2a3a", nightBottom="#181524" },
-            new FieldRow { id=Field.Machine,  name="기계", cost=2000000,
+            new FieldRow { id=Field.Machine,  name="기계", cost=150000000,
                            dayTop="#e2e6ea", dayBottom="#aab4bd", nightTop="#232833", nightBottom="#12161e" },
-            new FieldRow { id=Field.Dream,    name="꿈",   cost=5000000,
+            new FieldRow { id=Field.Dream,    name="꿈",   cost=350000000,
                            dayTop="#ece2f6", dayBottom="#c3b0e0", nightTop="#2c2347", nightBottom="#160f2b" },
-            new FieldRow { id=Field.Weather,  name="날씨", cost=12000000,
+            new FieldRow { id=Field.Weather,  name="날씨", cost=700000000,
                            dayTop="#dfe9f0", dayBottom="#9fb8c8", nightTop="#26303f", nightBottom="#131a26" },
         };
 

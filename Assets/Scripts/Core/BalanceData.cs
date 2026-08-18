@@ -57,8 +57,17 @@ namespace Deskmon.Core
         [Header("각인 포획 (SIGIL)")]
         [Tooltip("매칭 임계 (0~1, 높을수록 엄격) — tol")]
         [Range(0f, 1f)] public float sigilTolerance = 0.66f;
-        public string[] sigilEasy = { "circle", "triangle", "square", "caret", "wave" };
-        public string[] sigilHard = { "star", "zigzag", "spiral" };
+        public string[] sigilEasy =
+        {
+            "circle", "triangle", "square", "caret", "wave",
+            "hline", "vline", "slash", "backslash",
+            "check", "lshape", "stairs",
+        };
+        public string[] sigilHard =
+        {
+            "star", "zigzag", "spiral",
+            "heart", "infinity", "question", "loop", "mshape",
+        };
 
         [Header("미끼 (BAIT)")]
         public int baitCost = 5;

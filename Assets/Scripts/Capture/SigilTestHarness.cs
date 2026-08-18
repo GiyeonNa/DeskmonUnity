@@ -23,7 +23,7 @@ namespace Deskmon.Capture
         [SerializeField] int _failed;
         [SerializeField] string _lastResult = "-";
 
-        /// <summary>문양 8종 전수 확인 모드. 희귀도 추첨 대신 전부를 순서대로 넣는다.</summary>
+        /// <summary>문양 전수 확인 모드. 희귀도 추첨 대신 전부를 순서대로 넣는다.</summary>
         bool _allGlyphMode = true;
 
         Rarity _rarity = Rarity.Epic;
@@ -181,7 +181,7 @@ namespace Deskmon.Capture
             GUILayout.Space(4);
 
             Row("모드", _allGlyphMode
-                ? "<color=#9ff0a8>문양 8종 전수</color>"
+                ? $"<color=#9ff0a8>문양 전수 ({AllGlyphs.Length}종)</color>"
                 : $"희귀도 추첨 ({_rarity})");
 
             Row("문양", capture != null
@@ -216,7 +216,7 @@ namespace Deskmon.Capture
 
             GUILayout.Space(4);
             GUILayout.BeginHorizontal();
-            if (GUILayout.Button(_allGlyphMode ? "추첨 모드" : "8종 전수", _btn, GUILayout.Height(24)))
+            if (GUILayout.Button(_allGlyphMode ? "추첨 모드" : "전수 모드", _btn, GUILayout.Height(24)))
                 ToggleAllGlyphMode();
             if (GUILayout.Button("새 각인", _btn, GUILayout.Height(24))) Restart();
             GUILayout.EndHorizontal();

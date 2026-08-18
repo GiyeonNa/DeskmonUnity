@@ -52,6 +52,25 @@ namespace Deskmon.Capture
             { "circle", "원" }, { "triangle", "삼각형" }, { "square", "사각형" },
             { "star", "별" }, { "spiral", "나선" }, { "wave", "물결" },
             { "caret", "꺾쇠" }, { "zigzag", "번개" },
+            { "hline", "가로선" }, { "vline", "세로선" },
+            { "slash", "대각선(/)" }, { "backslash", "대각선(\\)" },
+            { "check", "체크" }, { "lshape", "ㄴ자" }, { "stairs", "계단" },
+            { "mshape", "M자" }, { "heart", "하트" }, { "infinity", "무한대" },
+            { "question", "물음표" }, { "loop", "고리" },
+        };
+
+        /// <summary>
+        /// $1 파이프라인을 타지 않는 직선 문양. <see cref="TryMatchLine"/>이 따로 판정한다.
+        ///
+        /// 직선을 Templates에 넣을 수 없는 이유 두 가지:
+        ///   1. ScaleToSquare가 바운딩 박스를 정사각으로 늘리므로, 직선의 미세한
+        ///      손떨림(폭 몇 px)이 250px 크기의 아무 도형으로 뻥튀기된다.
+        ///   2. 회전 정규화(IndicativeAngle)가 모든 직선을 같은 방향으로 눕히므로
+        ///      세로선과 가로선이 정규화 후 동일해져 구분 자체가 사라진다.
+        /// </summary>
+        static readonly HashSet<string> LineGlyphs = new HashSet<string>
+        {
+            "hline", "vline", "slash", "backslash",
         };
 
         static SigilRecognizer() => BuildTemplates();
@@ -75,6 +94,10 @@ namespace Deskmon.Capture
         public static float Match(IList<Vector2> points, string name)
         {
             if (points == null || points.Count < 8) return 0f;
+
+            if (LineGlyphs.Contains(name))
+                return TryMatchLine(points, out var line, out var s) && line == name ? s : 0f;
+
             if (!RawTemplates.ContainsKey(name)) return 0f;
 
             var cands = Candidates(points);
@@ -99,6 +122,11 @@ namespace Deskmon.Capture
         {
             if (points == null || points.Count < 8) return (null, 0f);
 
+            // 직선이면 $1 분류를 건너뛴다. 직선 획은 $1 공간에서 무의미한 값이 되므로
+            // (LineGlyphs 헤더 참고) 어느 쪽으로 분류되든 잘못된 답이다.
+            if (TryMatchLine(points, out var lineName, out var lineScore))
+                return (lineName, lineScore);
+
             var cands = Candidates(points);
             float best = float.MaxValue;
             string variant = null;
@@ -121,6 +149,61 @@ namespace Deskmon.Capture
         {
             var (name, score) = Recognize(points);
             return name == targetName && score >= tolerance;
+        }
+
+        // ── 직선 판정 ($1 밖) ──
+
+        /// <summary>
+        /// 획이 직선이면 가로/세로/대각 4방향 중 하나로 분류하고 점수를 준다.
+        /// LineGlyphs 헤더 참고.
+        ///
+        /// 판정 기준:
+        ///   직선성 - 양 끝점을 잇는 현에서 가장 멀리 벗어난 점의 거리 / 현 길이.
+        ///   방향   - 현의 각도. 4방향(0/45/90/135도) 중 가까운 쪽으로 분류.
+        ///            방향 간격이 45도이므로 10도까지 무감점, 이후 감점해 약 19도부터
+        ///            tol 0.66에서 탈락한다 - 이웃 방향과의 경계(22.5도) 부근은
+        ///            어느 쪽으로도 통과하지 못하는 애매 구간으로 남긴다.
+        /// 획 방향(위->아래 / 아래->위)은 각도를 0..180으로 접어 무시한다 -
+        /// Candidates가 획 순서를 뒤집는 것과 같은 취지다.
+        /// </summary>
+        static bool TryMatchLine(IList<Vector2> points, out string name, out float score)
+        {
+            name = null;
+            score = 0f;
+
+            Vector2 a = points[0], b = points[points.Count - 1];
+            Vector2 chord = b - a;
+            float len = chord.magnitude;
+            if (len < 30f) return false;   // 화면 px 기준 - 제자리 획은 방향을 논할 수 없다
+
+            Vector2 dir = chord / len;
+            float maxDev = 0f;
+            for (int i = 1; i < points.Count - 1; i++)
+            {
+                Vector2 v = points[i] - a;
+                float perp = Mathf.Abs(v.x * dir.y - v.y * dir.x);
+                if (perp > maxDev) maxDev = perp;
+            }
+
+            // 0.15 = 현 길이의 15%까지 휘어도 직선으로 본다. 손으로 그은 선은 보통
+            // 0.02~0.08이고, 기존 문양 중 가장 납작한 물결도 0.4를 넘는다.
+            float devRatio = maxDev / len;
+            if (devRatio > 0.15f) return false;
+
+            // 화면 좌표는 y가 위로 증가한다 - 45도 = 우상향(/), 135도 = 우하향(\)
+            float angle = Mathf.Repeat(Mathf.Atan2(chord.y, chord.x) * Mathf.Rad2Deg, 180f);
+
+            name = "hline";
+            float angleErr = Mathf.Min(angle, 180f - angle);
+            float d = Mathf.Abs(angle - 45f);
+            if (d < angleErr) { name = "slash"; angleErr = d; }
+            d = Mathf.Abs(angle - 90f);
+            if (d < angleErr) { name = "vline"; angleErr = d; }
+            d = Mathf.Abs(angle - 135f);
+            if (d < angleErr) { name = "backslash"; angleErr = d; }
+
+            score = Mathf.Clamp01(1f - devRatio * 1.2f - Mathf.Max(0f, angleErr - 10f) / 30f);
+            return true;
         }
 
         // ── $1 파이프라인 ──
@@ -307,6 +390,10 @@ namespace Deskmon.Capture
         //      충돌한다 - 정규화가 종횡비를 버리기 때문에 "2구간 꺾인 선"은
         //      방향이 달라도 비슷해진다(꺾쇠 vs 2꺾임 번개가 그랬다).
         //      테스트 씬의 "판정" 줄에서 분류가 빨간색으로 뜨면 그 충돌이다.
+        //
+        // 예외: 직선(hline/vline)은 이 절차를 따르지 않는다. $1이 직선을 다루지
+        // 못해서(LineGlyphs 헤더) TryMatchLine이 파이프라인 밖에서 판정하고,
+        // 등록도 RawTemplates에 표시용 좌표만 넣는다.
         // ─────────────────────────────────────────────────────────────────
 
         /// <summary>문양 등록. 표시용 원본과 기본 변형을 함께 넣는다.</summary>
@@ -371,6 +458,41 @@ namespace Deskmon.Capture
             Add("wave", wave);
             Add("caret", new[] { new Vector2(-1f, 0.8f), new Vector2(0f, -1f), new Vector2(1f, 0.8f) });
             Add("zigzag", new[] { new Vector2(-1f, -1f), new Vector2(1f, -0.5f), new Vector2(-1f, 0.4f), new Vector2(1f, 1f) });
+
+            // ── 확장 문양 (2026-08-18, 전체 20종 목표) ──
+
+            // 체크 - 짧게 내려찍고 길게 올린다. 팔 길이 비대칭이 꺾쇠와의 구분점이다.
+            Add("check", new[] { new Vector2(-1f, 0.3f), new Vector2(-0.4f, -1f), new Vector2(1f, 1f) });
+
+            // ㄴ자 - 내려긋고 오른쪽으로. 직각 + 축 정렬.
+            Add("lshape", new[] { new Vector2(-0.7f, 1f), new Vector2(-0.7f, -1f), new Vector2(1f, -1f) });
+
+            // 계단 - 오른쪽/아래 번갈아 세 단.
+            Add("stairs", new[]
+            {
+                new Vector2(-1f, 1f), new Vector2(-0.33f, 1f), new Vector2(-0.33f, 0.33f),
+                new Vector2(0.33f, 0.33f), new Vector2(0.33f, -0.33f),
+                new Vector2(1f, -0.33f), new Vector2(1f, -1f),
+            });
+
+            // M자 - 봉우리 두 개. 번개(대각 지그재그)와 달리 꼭짓점이 수직 방향이다.
+            Add("mshape", new[]
+            {
+                new Vector2(-1f, -1f), new Vector2(-0.5f, 1f), new Vector2(0f, -0.6f),
+                new Vector2(0.5f, 1f), new Vector2(1f, -1f),
+            });
+
+            Add("heart", MakeHeart());
+            Add("infinity", MakeInfinity());
+            Add("question", MakeQuestion());
+            Add("loop", MakeLoop());
+
+            // 직선 4종 - 표시용 원본만. Add()를 쓰지 않는 이유는 LineGlyphs 헤더 참고
+            // ($1 템플릿 공간에 들어가면 안 된다). 시작점은 자연스러운 획 방향 기준.
+            RawTemplates["hline"] = new[] { new Vector2(-1f, 0f), new Vector2(1f, 0f) };
+            RawTemplates["vline"] = new[] { new Vector2(0f, 1f), new Vector2(0f, -1f) };
+            RawTemplates["slash"] = new[] { new Vector2(1f, 1f), new Vector2(-1f, -1f) };
+            RawTemplates["backslash"] = new[] { new Vector2(-1f, 1f), new Vector2(1f, -1f) };
 
             AddDrawingVariants();
         }
@@ -473,6 +595,74 @@ namespace Deskmon.Capture
             {
                 float y = -1f + 2f * i / 20f;
                 a[i] = new Vector2(Mathf.Sin(i / 20f * Mathf.PI * 2f * cycles) * 0.9f, y);
+            }
+            return a;
+        }
+
+        /// <summary>하트 - 위 가운데 홈에서 시작해 한 바퀴. 매개변수 하트 곡선.</summary>
+        static Vector2[] MakeHeart()
+        {
+            var a = new Vector2[33];
+            for (int i = 0; i <= 32; i++)
+            {
+                float t = i / 32f * Mathf.PI * 2f;
+                float s = Mathf.Sin(t);
+                a[i] = new Vector2(s * s * s,
+                    (13f * Mathf.Cos(t) - 5f * Mathf.Cos(2f * t)
+                     - 2f * Mathf.Cos(3f * t) - Mathf.Cos(4f * t)) / 17f);
+            }
+            return a;
+        }
+
+        /// <summary>무한대 - 오른쪽 끝에서 시작하는 옆으로 누운 8. 세로 8도 같은 문양으로
+        /// 본다 (정규화가 종횡비를 버리므로 자동으로 그렇게 된다).
+        ///
+        /// 시작점을 가운데 교차점에 두면 안 된다 - 교차점이 무게중심과 같은 자리라
+        /// 회전 정규화 기준각(첫 점 -> 무게중심)이 손떨림에 따라 널뛴다.</summary>
+        static Vector2[] MakeInfinity()
+        {
+            var a = new Vector2[33];
+            for (int i = 0; i <= 32; i++)
+            {
+                float t = i / 32f * Mathf.PI * 2f;
+                a[i] = new Vector2(Mathf.Cos(t), Mathf.Sin(2f * t) * 0.45f);
+            }
+            return a;
+        }
+
+        /// <summary>물음표 (점 없음) - 왼쪽에서 위를 돌아 내려온 뒤 꼬리가 수직 낙하.</summary>
+        static Vector2[] MakeQuestion()
+        {
+            var a = new Vector2[20];
+            for (int i = 0; i < 16; i++)
+            {
+                // 호: 중심 (0, 0.45), 반지름 0.55, 180도에서 -90도까지
+                float ang = Mathf.PI - i / 15f * Mathf.PI * 1.5f;
+                a[i] = new Vector2(Mathf.Cos(ang) * 0.55f, 0.45f + Mathf.Sin(ang) * 0.55f);
+            }
+            for (int i = 16; i < 20; i++)
+                a[i] = new Vector2(0f, -0.1f - (i - 16) / 3f * 0.9f);
+            return a;
+        }
+
+        /// <summary>고리 - 좌하단에서 올라가 반시계로 한 바퀴 감고 우하단으로 빠진다.
+        /// 진입선과 탈출선이 교차하는 리본 매듭 모양.</summary>
+        static Vector2[] MakeLoop()
+        {
+            var a = new Vector2[24];
+            for (int i = 0; i < 5; i++)
+                a[i] = new Vector2(-1f + i / 4f * 1.35f, -1f + i / 4f * 1.1f);
+            for (int i = 0; i < 15; i++)
+            {
+                // 고리: 중심 (0, 0.35), 반지름 0.5, 진입각 -45도에서 반시계 300도
+                float ang = -Mathf.PI / 4f + i / 14f * Mathf.PI * 2f * 0.83f;
+                a[5 + i] = new Vector2(Mathf.Cos(ang) * 0.5f, 0.35f + Mathf.Sin(ang) * 0.5f);
+            }
+            Vector2 exit = a[19];
+            for (int i = 0; i < 4; i++)
+            {
+                float t = (i + 1) / 4f;
+                a[20 + i] = new Vector2(exit.x + (1f - exit.x) * t, exit.y + (-1f - exit.y) * t);
             }
             return a;
         }

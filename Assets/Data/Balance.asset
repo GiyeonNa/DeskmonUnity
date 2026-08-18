@@ -51,10 +51,22 @@ MonoBehaviour:
   - square
   - caret
   - wave
+  - hline
+  - vline
+  - slash
+  - backslash
+  - check
+  - lshape
+  - stairs
   sigilHard:
   - star
   - zigzag
   - spiral
+  - heart
+  - infinity
+  - question
+  - loop
+  - mshape
   baitCost: 5
   baitEatDuration: 4
   roamBaseSlots: 2

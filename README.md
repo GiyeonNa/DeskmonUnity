@@ -4,6 +4,9 @@
 투명 오버레이 창이 화면 전체를 덮고, 크리처가 작업 중인 창들 위를 산책한다.
 포획은 마우스로 문양을 그리는 "각인"으로 한다.
 
+> Windows 전용 · 개인 프로젝트 · 개발 진행 중.
+> 도감 151종 연결과 코어 루프(출몰-각인-도감-방목-진화)까지 완성된 상태다.
+
 - **엔진**: Unity 6000.0.77f1 · Windows Standalone (D3D11 · BitBlt 스왑체인)
 - **원본**: 검증이 끝난 Electron 프로토타입 (동작 "정답지"로 사용, 포팅 완료)
 - **창 제어**: [UniWindowController](https://github.com/kirurobo/UniWindowController) (UPM git 의존성 — 최초 열기 때 자동 수신)
@@ -137,3 +140,8 @@ Unity.exe -quit -batchmode -nographics \
 투명 창을 직접 Win32(`SetWindowLong` + `DwmExtendFrameIntoClientArea`)로 구현했다가
 **화면 전체가 검은 창으로 덮이는** 실패를 겪고 UniWindowController 위임으로 갈아엎었다.
 이유는 `Native/WindowController.cs` 상단 주석에 남겼다. 되돌리지 말 것.
+
+## 라이선스
+
+아직 정하지 않았다. 별도 명시가 있을 때까지 코드·도트·문서의 무단 사용/재배포 불가
+(All rights reserved). 도트와 디자인 원장은 이 프로젝트의 오리지널 창작물이다.

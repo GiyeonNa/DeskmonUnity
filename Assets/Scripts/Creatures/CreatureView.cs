@@ -23,10 +23,15 @@ namespace Deskmon.Creatures
         public Vector2 sleepRange = new Vector2(5f, 10f);
         [Range(0f, 1f)] public float sleepChance = 0.18f;
 
-        [Header("모션 (creature.js)")]
-        public float squashFreq = 6f;
-        public float squashAmp = 0.08f;
-        public bool hop;                        // 깡총이류 — sin 바운스
+        [Header("모션 - 대기는 호흡, 걷기는 꿀렁 (WobbleMotion 참고)")]
+        public float idleFreq = 2.2f;
+        public float idleAmp = 0.035f;
+        public float walkFreq = 11f;
+        public float walkAmp = 0.14f;
+        public float walkTiltDeg = 4f;
+        [Tooltip("걷기 발걸음 바운스 (px). hop 종은 hopHeight를 대신 쓴다.")]
+        public float walkBobPx = 2.5f;
+        public bool hop;                        // 점프 이동 종 — 큰 sin 바운스
         public float hopHeight = 6f;
 
         [Header("상호작용")]
@@ -58,9 +63,11 @@ namespace Deskmon.Creatures
         SpriteRenderer _sr;
         Camera _cam;
         Vector2 _target;
-        float _pauseT, _sleepT, _phase, _t;
+        float _pauseT, _sleepT, _t;
         int _dir = 1;
         Vector3 _baseScale;
+        WobbleMotion _wobble;
+        float _prevLift;   // 지난 프레임에 얹은 바운스 - 빼고 다시 얹어야 y 이동이 산다
 
         // ── IInteractive ──
         public Vector2 ScreenPosition => _cam != null ? (Vector2)_cam.WorldToScreenPoint(transform.position) : Vector2.zero;
@@ -74,7 +81,7 @@ namespace Deskmon.Creatures
         {
             _sr = GetComponent<SpriteRenderer>();
             _baseScale = transform.localScale;
-            _phase = Random.Range(0f, Mathf.PI * 2f);
+            _wobble.Seed(Random.Range(0f, Mathf.PI * 2f));
         }
 
         void Start()
@@ -82,6 +89,10 @@ namespace Deskmon.Creatures
             _cam = Camera.main;
             if (DesktopOverlay.Instance != null) DesktopOverlay.Instance.Register(this);
             PickTarget();
+
+            // 산책 시동. Idle + _pauseT 0이면 Tick의 어느 분기에도 걸리지 않아
+            // 쓰다듬기 전까지 영원히 서 있게 된다 - 잠깐 쉬었다 첫 걸음을 뗀다.
+            _pauseT = Random.Range(pauseRange.x, pauseRange.y);
         }
 
         void OnDestroy()
@@ -98,7 +109,7 @@ namespace Deskmon.Creatures
             CursorNear = (ScreenPosition - cursor).sqrMagnitude <= interactRadius * interactRadius;
 
             Tick(dt);
-            ApplyMotion();
+            ApplyMotion(dt);
         }
 
         /// <summary>overlay.html:105-120 상태 전이.</summary>
@@ -110,7 +121,8 @@ namespace Deskmon.Creatures
             if (state == State.Sleep)
             {
                 _sleepT -= dt;
-                if (_sleepT <= 0f) { state = State.Idle; _pauseT = 0f; }
+                // 깨면 새 쉼을 준다. 0으로 두면 위 시동 문제와 같은 이유로 영영 멈춘다.
+                if (_sleepT <= 0f) { state = State.Idle; _pauseT = Random.Range(pauseRange.x, pauseRange.y); }
                 return;
             }
 
@@ -152,31 +164,46 @@ namespace Deskmon.Creatures
             }
         }
 
-        /// <summary>creature.js:252 — 부피 보존 스쿼시 & 스트레치 + 좌우 플립 + 홉.</summary>
-        void ApplyMotion()
+        /// <summary>
+        /// 상태별 모션 - 대기는 느린 호흡, 걷기는 빠른 꿀렁 + 기우뚱 + 발걸음 바운스.
+        /// 프레임 걷기 애니메이션 대신 채택한 연출이다 (WobbleMotion 헤더 참고).
+        /// </summary>
+        void ApplyMotion(float dt)
         {
-            float sy = 1f + Mathf.Sin(_t * squashFreq + _phase) * squashAmp;
-            if (state == State.Sleep) sy = 1f + Mathf.Sin(_t * 1.5f + _phase) * 0.03f;   // 잠잘 땐 느린 호흡
-            float sx = 1f / sy;
+            bool walking = state == State.Walk;
+            float freq, amp, tilt = 0f, bobPx = 0f;
+
+            if (state == State.Sleep) { freq = 1.5f; amp = 0.03f; }          // 느린 호흡
+            else if (walking)
+            {
+                freq = walkFreq; amp = walkAmp; tilt = walkTiltDeg;
+                // 추격(공놀이) 중엔 외부가 y를 몰고, hop 종은 아래 홉이 y를 몬다
+                if (!ExternallyDriven && !hop) bobPx = walkBobPx;
+            }
+            else { freq = idleFreq; amp = idleAmp; }
+
+            _wobble.Step(dt, freq, amp, tilt);
+            _wobble.Scale(out float sx, out float sy);
 
             transform.localScale = new Vector3(
                 _baseScale.x * sx * _dir,   // 음수 x = 좌우 반전 (스프라이트 미러)
                 _baseScale.y * sy,
                 _baseScale.z);
+            transform.rotation = Quaternion.Euler(0f, 0f, _wobble.TiltDeg());
 
-            if (hop && state == State.Walk && !ExternallyDriven)   // 추격 중엔 외부가 y를 몬다
-            {
-                float bounce = Mathf.Abs(Mathf.Sin(_t * 8f)) * PixelsToUnits(hopHeight);
-                var p = transform.position;
-                transform.position = new Vector3(p.x, _groundY + bounce, p.z);
-            }
-            else
-            {
-                _groundY = transform.position.y;
-            }
+            // 바운스는 "지난 프레임 몫을 빼고 새로 얹는" 순수 시각 오프셋이다.
+            // 이전 구현은 걷기 시작 시점의 y를 붙들어서(_groundY), 걷는 동안
+            // Tick의 y 이동이 통째로 지워졌다 - 홉 종이 세로로 이동하지 못했다.
+            float lift = 0f;
+            if (walking && !ExternallyDriven)
+                lift = hop
+                    ? Mathf.Abs(Mathf.Sin(_t * 8f)) * PixelsToUnits(hopHeight)
+                    : _wobble.Bounce() * PixelsToUnits(bobPx);
+
+            var p = transform.position;
+            transform.position = new Vector3(p.x, p.y - _prevLift + lift, p.z);
+            _prevLift = lift;
         }
-
-        float _groundY;
 
         void PickTarget()
         {

@@ -1,5 +1,6 @@
 using UnityEngine;
 using Deskmon.Core;
+using Deskmon.Creatures;
 using Deskmon.Native;
 
 namespace Deskmon.Capture
@@ -41,6 +42,13 @@ namespace Deskmon.Capture
         public float driftSpeed = 40f;
         public float arriveDist = 12f;
 
+        [Header("모션 - CreatureView와 같은 손맛 (WobbleMotion)")]
+        public float idleFreq = 2.2f;
+        public float idleAmp = 0.035f;
+        public float walkFreq = 11f;
+        public float walkAmp = 0.14f;
+        public float walkTiltDeg = 4f;
+
         [Header("체류")]
         [Tooltip("true면 잡히기 전까지 떠나지 않는다. 원본의 체류시간 퇴장을 대체하는 " +
                  "2026-08-07 결정 - 스카우트(방치 자동 포획)를 보류하는 대신, 놓친 출몰이 " +
@@ -63,12 +71,18 @@ namespace Deskmon.Capture
         Vector2 _target;
         float _fleeT, _pantT, _blinkT, _fadingT;
         int _dir = 1;
+        Vector3 _baseScale;
+        Vector3 _lastPos;
+        WobbleMotion _wobble;
 
         void Start()
         {
             _cam = Camera.main;
             _blinkT = Random.Range(blinkInterval.x, blinkInterval.y);
             Alpha = species != null && species.pattern == BehaviorPattern.Blink ? 0f : 1f;
+            _baseScale = transform.localScale;   // GameState가 creatureScale을 먼저 곱해 둔다
+            _lastPos = transform.position;
+            _wobble.Seed(Random.Range(0f, Mathf.PI * 2f));
             PickTarget();
         }
 
@@ -88,18 +102,47 @@ namespace Deskmon.Capture
                 }
             }
 
-            // 각인 중에는 정지. overlay.html:352
-            if (capture != null && capture.Engaged) return;
-
-            switch (species != null ? species.pattern : BehaviorPattern.Calm)
+            // 각인 중에는 정지. overlay.html:352 (모션은 아래에서 호흡으로 이어진다)
+            bool engaged = capture != null && capture.Engaged;
+            if (!engaged)
             {
-                case BehaviorPattern.Shy:   UpdateShy(dt);   break;
-                case BehaviorPattern.Blink: UpdateBlink(dt); break;
-                case BehaviorPattern.Drift: WalkToTarget(dt, driftSpeed); break;
-                default:
-                    WalkToTarget(dt, species != null && species.hop ? hopSpeed : calmSpeed);
-                    break;
+                switch (species != null ? species.pattern : BehaviorPattern.Calm)
+                {
+                    case BehaviorPattern.Shy:   UpdateShy(dt);   break;
+                    case BehaviorPattern.Blink: UpdateBlink(dt); break;
+                    case BehaviorPattern.Drift: WalkToTarget(dt, driftSpeed); break;
+                    default:
+                        WalkToTarget(dt, species != null && species.hop ? hopSpeed : calmSpeed);
+                        break;
+                }
             }
+
+            // 포획 연출(CaughtAnimation)이 스케일을 몰기 시작하면 손을 뗀다.
+            // 컴포넌트는 출몰 시점부터 꺼진 채로 붙어 있고(GameState가 미리 달아 둔다)
+            // 포획 확정 때 enabled만 켜지므로, 존재가 아니라 enabled로 판정해야 한다.
+            if (!(TryGetComponent<CaughtAnimation>(out var caughtAnim) && caughtAnim.enabled))
+            {
+                // 실제 이동 여부는 위치 변화로 판정한다 - 도주/표류/걷기 어느 경로든 잡힌다
+                float speedPx = ((Vector2)(transform.position - _lastPos)).magnitude * 100f / Mathf.Max(dt, 1e-5f);
+                ApplyWobble(dt, !engaged && speedPx > 10f);
+            }
+            _lastPos = transform.position;
+        }
+
+        /// <summary>이동 중 꿀렁 + 좌우 반전. CreatureView.ApplyMotion과 같은 문법이다.</summary>
+        void ApplyWobble(float dt, bool moving)
+        {
+            _wobble.Step(dt,
+                moving ? walkFreq : idleFreq,
+                moving ? walkAmp : idleAmp,
+                moving ? walkTiltDeg : 0f);
+            _wobble.Scale(out float sx, out float sy);
+
+            transform.localScale = new Vector3(
+                _baseScale.x * sx * _dir,   // 음수 x = 좌우 반전
+                _baseScale.y * sy,
+                _baseScale.z);
+            transform.rotation = Quaternion.Euler(0f, 0f, _wobble.TiltDeg());
         }
 
         /// <summary>겁쟁이 - 커서가 가까우면 반대로 도망, 오래 도망가면 헐떡인다.</summary>

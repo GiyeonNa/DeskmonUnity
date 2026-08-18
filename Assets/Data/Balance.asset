@@ -88,6 +88,5 @@ MonoBehaviour:
   offlineSpawnPerHour: 2
   offlineSpawnCatch: 0.5
   milestoneBerry: 100
-  catchBonusSec: 60
   releaseSec: 30
   chronoHour: 21

@@ -110,7 +110,8 @@ namespace Deskmon.Core
 
         [Header("기타")]
         public int milestoneBerry = 100;
-        public float catchBonusSec = 60f;
+        // 원본 doCatch의 포획 즉시 보상(catchBonusSec, 60초치 생산)은 빼기로 결정
+        // (2026-08-18). 포획 보상은 마일스톤(CreatureRegistry)만 남긴다.
         [Tooltip("돌려보내기 = 해당 폼 이 초만큼의 생산을 베리로 — RELEASE_SEC")]
         public float releaseSec = 30f;
         [Tooltip("글로벌 동시 출몰 시각(금요일) — CHRONO.hour. 기획서 v4 §11 열린 결정 2.")]

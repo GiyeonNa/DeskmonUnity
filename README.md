@@ -7,6 +7,13 @@
 > Windows 전용 · 개인 프로젝트 · 개발 진행 중.
 > 도감 151종 연결과 코어 루프(출몰-각인-도감-방목-진화)까지 완성된 상태다.
 
+<p align="center">
+  <img src="Docs/images/readme_monsters.png" width="680"
+       alt="대표 몬스터 도트 - 몽글이 진화 라인, 배턴박쥐, 메아리멍, 잔물결핀, 달고래, 핵룡">
+</p>
+<p align="center"><sub>도감 151종 중 일부 - 위: 몽글이 진화 라인(초원) · 배턴박쥐(동굴) /
+아래: 메아리멍(동굴) · 잔물결핀(호수) · 달고래(호수 · 전설) · 핵룡(동굴 · 에픽). 전부 오리지널 64px 도트.</sub></p>
+
 - **엔진**: Unity 6000.0.77f1 · Windows Standalone (D3D11 · BitBlt 스왑체인)
 - **원본**: 검증이 끝난 Electron 프로토타입 (동작 "정답지"로 사용, 포팅 완료)
 - **창 제어**: [UniWindowController](https://github.com/kirurobo/UniWindowController) (UPM git 의존성 — 최초 열기 때 자동 수신)

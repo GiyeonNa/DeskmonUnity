@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using Deskmon.Core;
@@ -19,9 +20,11 @@ namespace Deskmon.UI
         readonly RectTransform _list;
         readonly GameObject _scrollView;
 
-        // 상세 보기 - 종 하나를 크게. 좌우로 도감 번호를 순환한다.
+        // 상세 보기 - 폼(도감 번호) 단위로 순환한다. 001 몽글이 -> 002 잎몽이 -> 003 꽃몽이
+        // -> 004 ... 종 단위로 돌리면 진화체는 자기 페이지가 없어 도트를 볼 방법이 없다.
         GameObject _detail;
         int _detailIndex = -1;
+        readonly List<(SpeciesData sp, int stage)> _formIndex = new List<(SpeciesData, int)>();
         bool DetailOpen => _detail != null && _detail.activeSelf;
 
         public DexPanel(Transform parent, UIRoot ui)
@@ -127,8 +130,7 @@ namespace Deskmon.UI
             rowBg.color = Color.clear;
             var rowBtn = row.gameObject.AddComponent<Button>();
             rowBtn.targetGraphic = rowBg;
-            int idx = _ui.Game.db.species.IndexOf(sp);
-            rowBtn.onClick.AddListener(() => ShowDetail(idx));
+            rowBtn.onClick.AddListener(() => ShowDetailOf(sp));
 
             var icon = UIKit.SpriteIcon(row, sp.SpriteAt(0), 26f);
             if (!seen) icon.color = new Color(0f, 0f, 0f, 0.55f);   // 실루엣
@@ -206,23 +208,54 @@ namespace Deskmon.UI
 
         // ── 상세 보기 ──
 
+        /// <summary>도감 번호 순서의 (종, 폼) 평탄 목록. 종 구성이 바뀌면 다시 만든다.</summary>
+        void EnsureFormIndex(DeskmonDatabase db)
+        {
+            int total = 0;
+            foreach (var sp in db.species) if (sp != null) total += sp.forms;
+            if (_formIndex.Count == total) return;
+
+            _formIndex.Clear();
+            foreach (var sp in db.species)
+            {
+                if (sp == null) continue;
+                for (int st = 0; st < sp.forms; st++) _formIndex.Add((sp, st));
+            }
+        }
+
+        /// <summary>이 종의 기본형 페이지를 연다 - 목록 줄 클릭.</summary>
+        void ShowDetailOf(SpeciesData sp)
+        {
+            var db = _ui.Game?.db;
+            if (db == null) return;
+            EnsureFormIndex(db);
+
+            for (int i = 0; i < _formIndex.Count; i++)
+                if (_formIndex[i].sp == sp && _formIndex[i].stage == 0) { ShowDetail(i); return; }
+        }
+
         /// <summary>
-        /// 종 하나를 크게 보여준다. index는 도감 번호(-1)이고 좌우로 순환한다.
-        /// 미포획이면 실루엣 + ??? + 설명 숨김 - 목록과 같은 규칙이다.
+        /// 폼 하나를 크게 보여준다. index는 평탄 목록 위치이고 좌우로 순환한다.
+        /// 그 폼을 기록하지 못했으면 실루엣 + ??? - 진화체는 진화시켜야 보인다.
+        /// 설명/포획 횟수는 라인 단위 정보라 기본형을 잡았으면 보여준다.
         /// </summary>
         void ShowDetail(int index)
         {
             var game = _ui.Game;
             var db = game?.db;
-            if (db == null || db.species.Count == 0 || game.Save == null) return;
+            if (db == null || game.Save == null) return;
 
-            int n = db.species.Count;
+            EnsureFormIndex(db);
+            if (_formIndex.Count == 0) return;
+
+            int n = _formIndex.Count;
             _detailIndex = (index % n + n) % n;   // 음수 안전 순환
 
-            var sp = db.species[_detailIndex];
+            var (sp, stage) = _formIndex[_detailIndex];
             var save = game.Save;
             var dx = save.Dex(sp.id);
             bool seen = dx.caught > 0;
+            bool formSeen = dx.forms[stage] || dx.shinyForms[stage];
 
             _scrollView.SetActive(false);
             if (_detail == null)
@@ -245,8 +278,8 @@ namespace Deskmon.UI
                                     () => ShowDetail(_detailIndex - 1));
             UIKit.Fixed(prev.gameObject, 34f, 24f);
 
-            // 정본 도감 번호(151 원장, 기본형 기준). 원장 미연결 데이터면 목록 순서로 대체.
-            int dexNo = sp.DexNoAt(0);
+            // 정본 도감 번호(151 원장, 폼 단위). 원장 미연결 데이터면 목록 순서로 대체.
+            int dexNo = sp.DexNoAt(stage);
             var no = UIKit.Label(nav, $"No.{(dexNo > 0 ? dexNo : _detailIndex + 1):000}", 13, UIKit.TextSub,
                                  TextAnchor.MiddleCenter);
             UIKit.Fixed(no.gameObject, 70f, 24f);
@@ -262,15 +295,15 @@ namespace Deskmon.UI
             var body = UIKit.HRow(v, 100f, 10f);
             UIKit.Fixed(body.gameObject, 0f, 100f);
 
-            var icon = UIKit.SpriteIcon(body, sp.SpriteAt(0), 96f);
-            if (!seen) icon.color = new Color(0f, 0f, 0f, 0.55f);   // 실루엣
+            var icon = UIKit.SpriteIcon(body, sp.SpriteAt(stage), 96f);
+            if (!formSeen) icon.color = new Color(0f, 0f, 0f, 0.55f);   // 실루엣
             UIKit.Fixed(icon.gameObject, 96f, 96f);
 
             var info = UIKit.VList(body, 3f, new RectOffset(0, 0, 0, 0));
             UIKit.Fixed(info.gameObject, 176f, 100f);
 
-            var nameLabel = UIKit.Label(info, seen ? sp.displayName : "???", 17,
-                                        seen ? UIKit.TextMain : UIKit.TextSub);
+            var nameLabel = UIKit.Label(info, formSeen ? sp.NameAt(stage) : "???", 17,
+                                        formSeen ? UIKit.TextMain : UIKit.TextSub);
             nameLabel.fontStyle = FontStyle.Bold;
             UIKit.Fixed(nameLabel.gameObject, 0f, 22f);
 
@@ -282,12 +315,15 @@ namespace Deskmon.UI
                 meta += save.faction == "dew" ? " · 이슬 팀" : " · 이끼 팀";
             UIKit.Fixed(UIKit.Label(info, meta, 12, UIKit.Accent).gameObject, 0f, 16f);
 
-            // 진화 라인 - 만난 폼만 이름을 보여준다
+            // 진화 라인 - 만난 폼만 이름을 보여주고, 지금 보는 폼을 굵게 표시한다
             if (sp.forms > 1)
             {
                 var names = new string[sp.forms];
                 for (int i = 0; i < sp.forms; i++)
-                    names[i] = (dx.forms[i] || dx.shinyForms[i]) ? sp.NameAt(i) : "???";
+                {
+                    string nm = (dx.forms[i] || dx.shinyForms[i]) ? sp.NameAt(i) : "???";
+                    names[i] = i == stage ? $"<b>{nm}</b>" : nm;
+                }
                 UIKit.Fixed(UIKit.Label(info, string.Join(" → ", names), 11, UIKit.TextSub)
                     .gameObject, 0f, 16f);
             }
@@ -304,9 +340,9 @@ namespace Deskmon.UI
             UIKit.Fixed(UIKit.Label(info, seen ? $"포획 {dx.caught}회" : "", 11, UIKit.TextSub)
                 .gameObject, 0f, 14f);
 
-            // 설명 - 미포획이면 감춘다. 도감은 만나야 채워지는 책이다.
-            var desc = UIKit.Label(v, seen ? sp.description : "아직 만나지 못한 몬스터입니다.",
-                                   13, seen ? UIKit.TextMain : UIKit.TextSub);
+            // 설명 - 그 폼을 기록하지 못했으면 감춘다. 도감은 만나야 채워지는 책이다.
+            var desc = UIKit.Label(v, formSeen ? sp.description : "아직 만나지 못한 몬스터입니다.",
+                                   13, formSeen ? UIKit.TextMain : UIKit.TextSub);
             desc.horizontalOverflow = HorizontalWrapMode.Wrap;
             desc.alignment = TextAnchor.UpperLeft;
             UIKit.Fixed(desc.gameObject, 0f, 80f);
